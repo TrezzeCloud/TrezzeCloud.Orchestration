@@ -50,6 +50,66 @@ services:
 
     networks:
       - trezzecloud-network
+  
+  mongodb:
+    image: mongo:8
+    container_name: trezzecloud-mongodb
+    hostname: mongodb
+    restart: unless-stopped
+    
+    ports:
+    - "27017:27017"
+
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_USERNAME:-admin}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD:-admin123}
+
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "mongosh",
+          "--username",
+          "admin",
+          "--password",
+          "admin123",
+          "--authenticationDatabase",
+          "admin",
+          "--eval",
+          "db.adminCommand('ping')"
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+    volumes:
+      - mongodb_data:/data/db
+
+    networks:
+      - trezzecloud-network
+
+  redis:
+    image: redis:7-alpine
+    container_name: trezzecloud-redis
+    hostname: redis
+    restart: unless-stopped
+
+    ports:
+      - "6379:6379"
+
+    command: redis-server --appendonly yes
+
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+    volumes:
+      - redis_data:/data
+
+    networks:
+      - trezzecloud-network
 
   users-api:
     image: trezzecloud-users-api
@@ -98,6 +158,10 @@ services:
         condition: service_healthy
       sqlserver:
         condition: service_healthy
+      mongodb:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
 
     ports:
       - "8082:8080"
@@ -106,6 +170,11 @@ services:
       ASPNETCORE_ENVIRONMENT: Development
 
       ConnectionStrings__CatalogDatabase: ${CATALOG_CONNECTION_STRING:-Server=sqlserver;Database=TrezzeCloudCatalog;User Id=sa;Password=Your_password123;TrustServerCertificate=True}
+
+      MongoDb__ConnectionString: ${MONGO_CONNECTION_STRING:-mongodb://admin:admin123@mongodb:27017/?authSource=admin}
+      MongoDb__DatabaseName: ${MONGO_DATABASE_NAME:-TrezzeCloudCatalog}
+
+      Redis__ConnectionString: ${REDIS_CONNECTION_STRING:-redis:6379}
 
       RabbitMq__Host: ${RABBITMQ_HOST:-rabbitmq}
       RabbitMq__Username: ${RABBITMQ_USERNAME:-guest}
@@ -174,3 +243,5 @@ networks:
 volumes:
   rabbitmq_data:
   sqlserver_data:
+  mongodb_data:
+  redis_data:
