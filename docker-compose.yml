@@ -22,9 +22,12 @@ services:
 
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
+      - ./k8s/rabbitmq/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf:ro
+      - ./k8s/rabbitmq/definitions.json:/etc/rabbitmq/definitions.json:ro
 
     networks:
       - trezzecloud-network
+
 
   sqlserver:
     image: mcr.microsoft.com/mssql/server:2022-latest
@@ -40,7 +43,11 @@ services:
       - "1433:1433"
 
     healthcheck:
-      test: ["CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -C -S localhost -U sa -P \"$$SA_PASSWORD\" -Q \"SELECT 1\" || exit 1"]
+      test:
+        [
+          "CMD-SHELL",
+          "/opt/mssql-tools18/bin/sqlcmd -C -S localhost -U sa -P \"$$SA_PASSWORD\" -Q \"SELECT 1\" || exit 1"
+        ]
       interval: 10s
       timeout: 5s
       retries: 20
@@ -50,15 +57,16 @@ services:
 
     networks:
       - trezzecloud-network
-  
+
+
   mongodb:
     image: mongo:8
     container_name: trezzecloud-mongodb
     hostname: mongodb
     restart: unless-stopped
-    
+
     ports:
-    - "27017:27017"
+      - "27017:27017"
 
     environment:
       MONGO_INITDB_ROOT_USERNAME: ${MONGO_USERNAME:-admin}
@@ -88,6 +96,7 @@ services:
     networks:
       - trezzecloud-network
 
+
   redis:
     image: redis:7-alpine
     container_name: trezzecloud-redis
@@ -111,6 +120,31 @@ services:
     networks:
       - trezzecloud-network
 
+
+  azurite:
+    image: mcr.microsoft.com/azure-storage/azurite
+    container_name: trezzecloud-azurite
+    hostname: azurite
+    restart: unless-stopped
+
+    ports:
+      - "10000:10000"
+      - "10001:10001"
+      - "10002:10002"
+
+    command: >
+      azurite
+      --blobHost 0.0.0.0
+      --queueHost 0.0.0.0
+      --tableHost 0.0.0.0
+
+    volumes:
+      - azurite_data:/data
+
+    networks:
+      - trezzecloud-network
+
+
   users-api:
     image: trezzecloud-users-api
     container_name: trezzecloud-users-api
@@ -122,6 +156,7 @@ services:
     depends_on:
       rabbitmq:
         condition: service_healthy
+
       sqlserver:
         condition: service_healthy
 
@@ -138,12 +173,14 @@ services:
       RabbitMq__Password: ${RABBITMQ_PASSWORD:-guest}
 
       AdminUser__Password: ${USERS_ADMIN_PASSWORD:-Admin@123}
+
       Jwt__Issuer: ${JWT_ISSUER:-TrezzeCloud}
       Jwt__Audience: ${JWT_AUDIENCE:-TrezzeCloud}
       Jwt__SecretKey: ${JWT_SECRET_KEY:-SUPER_SECRET_KEY_123456789_SUPER_SECRET_KEY}
 
     networks:
       - trezzecloud-network
+
 
   catalog-api:
     image: trezzecloud-catalog-api
@@ -156,10 +193,13 @@ services:
     depends_on:
       rabbitmq:
         condition: service_healthy
+
       sqlserver:
         condition: service_healthy
+
       mongodb:
         condition: service_healthy
+
       redis:
         condition: service_healthy
 
@@ -187,6 +227,7 @@ services:
     networks:
       - trezzecloud-network
 
+
   payments-api:
     image: trezzecloud-payments-api
     container_name: trezzecloud-payments-api
@@ -212,36 +253,40 @@ services:
     networks:
       - trezzecloud-network
 
-  notifications-api:
-    image: trezzecloud-notifications-api
-    container_name: trezzecloud-notifications-api
+
+  notifications-functions:
+    container_name: trezzecloud-notifications-functions
     restart: unless-stopped
 
     build:
       context: ../TrezzeCloud.NotificationsAPI
+      dockerfile: src/TrezzeCloud.Notifications.Functions/Dockerfile
 
     depends_on:
       rabbitmq:
         condition: service_healthy
 
-    ports:
-      - "8084:8080"
+      azurite:
+        condition: service_started
 
     environment:
-      ASPNETCORE_ENVIRONMENT: Development
+      FUNCTIONS_WORKER_RUNTIME: dotnet-isolated
 
-      RabbitMq__Host: ${RABBITMQ_HOST:-rabbitmq}
-      RabbitMq__Username: ${RABBITMQ_USERNAME:-guest}
-      RabbitMq__Password: ${RABBITMQ_PASSWORD:-guest}
+      RabbitMqConnection: amqp://guest:guest@rabbitmq:5672
+
+      AzureWebJobsStorage: "DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;BlobEndpoint=http://azurite:10000/devstoreaccount1;QueueEndpoint=http://azurite:10001/devstoreaccount1;TableEndpoint=http://azurite:10002/devstoreaccount1"
 
     networks:
       - trezzecloud-network
 
+
 networks:
   trezzecloud-network:
+
 
 volumes:
   rabbitmq_data:
   sqlserver_data:
   mongodb_data:
   redis_data:
+  azurite_data:
