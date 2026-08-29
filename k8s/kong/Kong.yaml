@@ -1,0 +1,56 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kong
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kong
+  template:
+    metadata:
+      labels:
+        app: kong
+    spec:
+      containers:
+      - name: kong
+        image: kong:3.6
+        env:
+        - name: KONG_DATABASE
+          value: "off"
+        - name: KONG_DECLARATIVE_CONFIG
+          value: /kong/declarative/kong.yml
+        - name: KONG_PROXY_ACCESS_LOG
+          value: /dev/stdout
+        - name: KONG_PROXY_ERROR_LOG
+          value: /dev/stderr
+        - name: KONG_ADMIN_LISTEN
+          value: 0.0.0.0:8001
+        ports:
+        - containerPort: 8000
+        - containerPort: 8001
+        volumeMounts:
+        - name: kong-config
+          mountPath: /kong/declarative
+      volumes:
+      - name: kong-config
+        configMap:
+          name: kong-declarative-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: kong
+spec:
+  selector:
+    app: kong
+  type: NodePort
+  ports:
+    - name: proxy
+      port: 8000
+      targetPort: 8000
+      nodePort: 30090
+    - name: admin
+      port: 8001
+      targetPort: 8001
+      nodePort: 30091
