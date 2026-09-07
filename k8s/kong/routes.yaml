@@ -1,32 +1,67 @@
 _format_version: "3.0"
-consumers:
-  - username: trezzecloud-app
-    jwt_secrets:
-      - key: TrezzeCloud
-        algorithm: HS256
-        secret: SUPER_SECRET_KEY_123456789_SUPER_SECRET_KEY
 services:
   - name: users-api
-    url: http://users-api:80
+    url: http://users-api:8080
     routes:
-      - name: users-public-route
-        paths:
-          - /api/users/login
-          - /api/users/register
+      - name: users-auth-public
+        methods: [POST]
+        paths: ['~/api/users/(login|register|refresh-login)/?$']
         strip_path: false
-      - name: users-protected-route
-        paths:
-          - /api/users
+      - name: users-admin
+        methods: [GET]
+        paths: ['~/api/users(?:/[0-9a-fA-F-]+)?/?$']
         strip_path: false
         plugins:
           - name: jwt
-            config:
-              claims_to_verify:
-                - exp
+            config: &jwt
+              key_claim_name: iss
+              claims_to_verify: [exp]
+              uri_param_names: []
+              cookie_names: []
+              header_names: [authorization]
   - name: catalog-api
-    url: http://catalog-api:80
+    url: http://catalog-api:8080
     routes:
-      - name: catalog-route
-        paths:
-          - /api/games
+      - name: catalog-read
+        methods: [GET]
+        paths: ['~/api/games(?:/[0-9a-fA-F-]+)?/?$']
         strip_path: false
+      - name: reviews-read
+        methods: [GET]
+        paths: ['~/api/games/[0-9a-fA-F-]+/reviews/?$']
+        strip_path: false
+      - name: catalog-create
+        methods: [POST]
+        paths: ['~/api/games/?$']
+        strip_path: false
+        plugins:
+          - name: jwt
+            config: *jwt
+      - name: catalog-update-delete
+        methods: [PUT, DELETE]
+        paths: ['~/api/games/[0-9a-fA-F-]+/?$']
+        strip_path: false
+        plugins:
+          - name: jwt
+            config: *jwt
+      - name: reviews-create
+        methods: [POST]
+        paths: ['~/api/games/[0-9a-fA-F-]+/reviews/?$']
+        strip_path: false
+        plugins:
+          - name: jwt
+            config: *jwt
+      - name: store-purchase
+        methods: [POST]
+        paths: ['~/api/store/purchase/[0-9a-fA-F-]+/?$']
+        strip_path: false
+        plugins:
+          - name: jwt
+            config: *jwt
+      - name: store-library
+        methods: [GET]
+        paths: ['~/api/store/my-library/?$']
+        strip_path: false
+        plugins:
+          - name: jwt
+            config: *jwt

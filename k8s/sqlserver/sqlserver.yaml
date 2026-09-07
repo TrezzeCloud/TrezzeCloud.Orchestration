@@ -39,10 +39,9 @@ kind: Service
 metadata:
   name: sqlserver
 spec:
-  type: NodePort
+  type: ClusterIP
   selector:
     app: sqlserver
   ports:
     - port: 1433
       targetPort: 1433
-      nodePort: 31433

@@ -12,30 +12,50 @@ spec:
       labels:
         app: kong
     spec:
+      securityContext:
+        fsGroup: 1000
       containers:
-      - name: kong
-        image: kong:3.6
-        env:
-        - name: KONG_DATABASE
-          value: "off"
-        - name: KONG_DECLARATIVE_CONFIG
-          value: /kong/declarative/kong.yml
-        - name: KONG_PROXY_ACCESS_LOG
-          value: /dev/stdout
-        - name: KONG_PROXY_ERROR_LOG
-          value: /dev/stderr
-        - name: KONG_ADMIN_LISTEN
-          value: 0.0.0.0:8001
-        ports:
-        - containerPort: 8000
-        - containerPort: 8001
-        volumeMounts:
-        - name: kong-config
-          mountPath: /kong/declarative
+        - name: kong
+          image: kong:3.6
+          command: [/bin/sh, /kong/template/start-kong.sh]
+          env:
+            - name: KONG_DATABASE
+              value: "off"
+            - name: KONG_DECLARATIVE_CONFIG
+              value: /kong/runtime/kong.yml
+            - name: KONG_ADMIN_LISTEN
+              value: "off"
+            - name: KONG_PROXY_LISTEN
+              value: 0.0.0.0:8000
+            - name: JWT_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: jwt-secret
+                  key: JWT_SECRET_KEY
+            - name: JWT_ISSUER
+              valueFrom:
+                secretKeyRef:
+                  name: jwt-secret
+                  key: JWT_ISSUER
+          ports:
+            - containerPort: 8000
+          readinessProbe:
+            tcpSocket:
+              port: 8000
+            initialDelaySeconds: 10
+          volumeMounts:
+            - name: kong-config
+              mountPath: /kong/template
+              readOnly: true
+            - name: kong-runtime
+              mountPath: /kong/runtime
       volumes:
-      - name: kong-config
-        configMap:
-          name: kong-declarative-config
+        - name: kong-config
+          configMap:
+            name: kong-declarative-config
+        - name: kong-runtime
+          emptyDir:
+            medium: Memory
 ---
 apiVersion: v1
 kind: Service
@@ -50,7 +70,3 @@ spec:
       port: 8000
       targetPort: 8000
       nodePort: 30090
-    - name: admin
-      port: 8001
-      targetPort: 8001
-      nodePort: 30091

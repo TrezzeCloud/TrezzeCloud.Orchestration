@@ -1,0 +1,11 @@
+{
+  "messageType": ["urn:message:TrezzeCloud.Contracts.Events:PaymentProcessedEvent"],
+  "message": {
+    "orderId": "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
+    "userId": "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb",
+    "gameId": "cccccccc-cccc-cccc-cccc-cccccccccccc",
+    "price": "10.00",
+    "status": "Approved",
+    "processedAt": "2026-09-05T16:47:27.5395534Z"
+  }
+}
