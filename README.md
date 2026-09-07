@@ -175,16 +175,28 @@ O primeiro script valida Compose, isolamento das portas, consistência da chave 
 
 Para testes unitários dos serviços, execute `dotnet test` em cada solução existente. Os builds Docker compilam as quatro aplicações, mas não executam automaticamente os testes unitários. A validação de YAML local não substitui a validação de schema/admission nem um rollout real em Kubernetes.
 
-### Resultado e pendências identificadas nesta etapa
+### Resultados finais da Fase 3
 
-- Build Docker das quatro aplicações: aprovado.
+- Quatro imagens Docker reconstruídas com sucesso.
 - Compose, YAML/Kustomize e `kong config parse`: aprovados; nenhum contexto Kubernetes estava configurado para validar schema/admission ou fazer rollout.
 - Testes HTTP em stack isolada com volumes novos: 67 verificações aprovadas, incluindo assinatura JWT adulterada, expiração, issuer, roles, refresh, CRUD/cache, MongoDB e compra até a biblioteca.
-- Testes unitários existentes: UsersAPI 6, CatalogAPI 19 e NotificationsAPI 22 aprovados. PaymentsAPI não possui projeto de testes. A restauração da UsersAPI apresentou aviso NU1900 ao consultar dados de vulnerabilidade no NuGet; os testes passaram.
-- As duas Functions iniciaram e receberam eventos reais; o e-mail de boas-vindas foi simulado.
-- **Confirmação de pagamento pendente na NotificationsAPI:** o MassTransit 8.5.3 publica o decimal `price` como string (`"10.00"`). O desserializador atual da Function rejeita esse payload, embora seus testes com número JSON passem. A mensagem é consumida sem a confirmação. O fixture sanitizado [payment-processed.masstransit.json](tests/fixtures/payment-processed.masstransit.json) reproduz o formato observado. A próxima correção deve aceitar números em string (por exemplo, `JsonNumberHandling.AllowReadingFromString`) e testar o envelope real. Nenhum código da NotificationsAPI foi alterado nesta etapa de Orchestration.
-- A implantação Azure e a conectividade privada da Function ao RabbitMQ continuam sendo passos externos documentados acima.
+- Duas verificações explícitas adicionais do cache aprovadas: miss na primeira consulta e hit na segunda, com respostas idênticas.
+- 61 testes unitários aprovados: UsersAPI 6, CatalogAPI 19, PaymentsAPI 3 e Notifications.Functions 33; zero falhas e zero testes ignorados.
+- MongoDB aprovado: criação e consulta de avaliações.
+- Redis aprovado: miss, hit e invalidação após Create, Update e Delete.
+- UserCreatedFunction aprovada: consumo do evento e simulação do e-mail de boas-vindas.
+- PaymentProcessedFunction aprovada: pagamento Approved, inclusão na biblioteca e simulação da confirmação de compra.
+- Tratamento de `price` como número JSON e string decimal corrigido e testado. O fixture sanitizado [payment-processed.masstransit.json](tests/fixtures/payment-processed.masstransit.json) reproduz o envelope real do MassTransit.
+- Nenhuma vulnerabilidade encontrada nas auditorias finais de pacotes, incluindo dependências transitivas, após a correção da PaymentsAPI.
+- Novo repositório Notifications.Functions publicado na organização TrezzeCloud.
+
+### Pendências fora da validação local
+
+- Rollout real em Kubernetes.
+- Implantação real no Azure.
+- Conectividade privada Azure Functions → RabbitMQ.
+- Observabilidade: explicitamente fora desta etapa; nenhuma stack foi implementada.
 
 ## Repositório próprio da Function
 
-A implementação serverless e seus 33 testes estão agora em [TrezzeCloud.Notifications.Functions](https://github.com/TrezzeCloud/TrezzeCloud.Notifications.Functions). O Compose utiliza o novo contexto e Dockerfile da raiz. A NotificationsAPI antiga permanece apenas como legado. A validação posterior à correção de price confirmou o consumo e a simulação das duas notificações; os resultados anteriores acima são históricos.
+A implementação serverless e seus 33 testes estão publicados em [TrezzeCloud.Notifications.Functions](https://github.com/TrezzeCloud/TrezzeCloud.Notifications.Functions). O Compose utiliza o novo contexto e Dockerfile da raiz. A NotificationsAPI antiga permanece apenas como legado. A validação final confirmou o consumo e a simulação das duas notificações.
