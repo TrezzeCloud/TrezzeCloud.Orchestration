@@ -187,4 +187,4 @@ Para testes unitários dos serviços, execute `dotnet test` em cada solução ex
 
 ## Repositório próprio da Function
 
-A implementação serverless e seus 33 testes estão agora em [TrezzeCloud.Notifications.Functions](../TrezzeCloud.Notifications.Functions/README.md). O Compose utiliza o novo contexto e Dockerfile da raiz. A NotificationsAPI antiga permanece apenas como legado. A validação posterior à correção de price confirmou o consumo e a simulação das duas notificações; os resultados anteriores acima são históricos.
+A implementação serverless e seus 33 testes estão agora em [TrezzeCloud.Notifications.Functions](https://github.com/TrezzeCloud/TrezzeCloud.Notifications.Functions). O Compose utiliza o novo contexto e Dockerfile da raiz. A NotificationsAPI antiga permanece apenas como legado. A validação posterior à correção de price confirmou o consumo e a simulação das duas notificações; os resultados anteriores acima são históricos.
