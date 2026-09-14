@@ -1,0 +1,67 @@
+_format_version: "3.0"
+services:
+  - name: users-api
+    url: http://users-api:8080
+    routes:
+      - name: users-auth-public
+        methods: [POST]
+        paths: ['~/api/users/(login|register|refresh-login)/?$']
+        strip_path: false
+      - name: users-admin
+        methods: [GET]
+        paths: ['~/api/users(?:/[0-9a-fA-F-]+)?/?$']
+        strip_path: false
+        plugins:
+          - name: jwt
+            config: &jwt
+              key_claim_name: iss
+              claims_to_verify: [exp]
+              uri_param_names: []
+              cookie_names: []
+              header_names: [authorization]
+  - name: catalog-api
+    url: http://catalog-api:8080
+    routes:
+      - name: catalog-read
+        methods: [GET]
+        paths: ['~/api/games(?:/[0-9a-fA-F-]+)?/?$']
+        strip_path: false
+      - name: reviews-read
+        methods: [GET]
+        paths: ['~/api/games/[0-9a-fA-F-]+/reviews/?$']
+        strip_path: false
+      - name: catalog-create
+        methods: [POST]
+        paths: ['~/api/games/?$']
+        strip_path: false
+        plugins:
+          - name: jwt
+            config: *jwt
+      - name: catalog-update-delete
+        methods: [PUT, DELETE]
+        paths: ['~/api/games/[0-9a-fA-F-]+/?$']
+        strip_path: false
+        plugins:
+          - name: jwt
+            config: *jwt
+      - name: reviews-create
+        methods: [POST]
+        paths: ['~/api/games/[0-9a-fA-F-]+/reviews/?$']
+        strip_path: false
+        plugins:
+          - name: jwt
+            config: *jwt
+      - name: store-purchase
+        methods: [POST]
+        paths: ['~/api/store/purchase/[0-9a-fA-F-]+/?$']
+        strip_path: false
+        plugins:
+          - name: jwt
+            config: *jwt
+      - name: store-library
+        methods: [GET]
+        paths: ['~/api/store/my-library/?$']
+        strip_path: false
+        plugins:
+          - name: jwt
+            config: *jwt

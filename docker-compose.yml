@@ -1,30 +1,64 @@
 services:
 
+  kong:
+    image: kong:3.6
+    restart: unless-stopped
+    entrypoint: [/bin/sh, /kong/template/start-kong.sh]
+    ports:
+      - "8000:8000"
+    environment:
+      KONG_DATABASE: "off"
+      KONG_DECLARATIVE_CONFIG: /kong/runtime/kong.yml
+      KONG_ADMIN_LISTEN: "off"
+      KONG_PROXY_LISTEN: 0.0.0.0:8000
+      JWT_ISSUER: ${JWT_ISSUER:-TrezzeCloud}
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY:?Run scripts/prepare-local.ps1 first}
+    volumes:
+      - ./k8s/kong/routes.yaml:/kong/template/routes.yaml:ro
+      - ./k8s/kong/start-kong.sh:/kong/template/start-kong.sh:ro
+    tmpfs:
+      - /kong/runtime:uid=1000,gid=1000,mode=0700
+    depends_on:
+      users-api:
+        condition: service_started
+      catalog-api:
+        condition: service_started
+    healthcheck:
+      test: [CMD, kong, health]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+    networks:
+      - trezzecloud-network
+
+
   rabbitmq:
     image: rabbitmq:3-management
+    entrypoint: [/bin/sh, /etc/rabbitmq/start-rabbitmq.sh]
     container_name: trezzecloud-rabbitmq
     hostname: rabbitmq
     restart: unless-stopped
 
-    ports:
-      - "5672:5672"
-      - "15672:15672"
 
     environment:
       RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER:-guest}
       RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS:-guest}
 
     healthcheck:
-      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      test: [CMD-SHELL, 'test -f /tmp/trezzecloud-rabbitmq-ready && rabbitmq-diagnostics -q check_running']
       interval: 10s
       timeout: 5s
       retries: 12
 
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
+      - ./k8s/rabbitmq/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf:ro
+      - ./k8s/rabbitmq/definitions.json:/etc/rabbitmq/definitions.json:ro
+      - ./k8s/rabbitmq/start-rabbitmq.sh:/etc/rabbitmq/start-rabbitmq.sh:ro
 
     networks:
       - trezzecloud-network
+
 
   sqlserver:
     image: mcr.microsoft.com/mssql/server:2022-latest
@@ -36,11 +70,13 @@ services:
       ACCEPT_EULA: "Y"
       SA_PASSWORD: ${SQL_SA_PASSWORD:-Your_password123}
 
-    ports:
-      - "1433:1433"
 
     healthcheck:
-      test: ["CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -C -S localhost -U sa -P \"$$SA_PASSWORD\" -Q \"SELECT 1\" || exit 1"]
+      test:
+        [
+          "CMD-SHELL",
+          "/opt/mssql-tools18/bin/sqlcmd -C -S localhost -U sa -P \"$$SA_PASSWORD\" -Q \"SELECT 1\" || exit 1"
+        ]
       interval: 10s
       timeout: 5s
       retries: 20
@@ -50,6 +86,73 @@ services:
 
     networks:
       - trezzecloud-network
+
+
+  mongodb:
+    image: mongo:8
+    container_name: trezzecloud-mongodb
+    hostname: mongodb
+    restart: unless-stopped
+
+
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_USERNAME:-admin}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD:-admin123}
+
+    healthcheck:
+      test: [CMD-SHELL, 'mongosh --username "$$MONGO_INITDB_ROOT_USERNAME" --password "$$MONGO_INITDB_ROOT_PASSWORD" --authenticationDatabase admin --quiet --eval "db.adminCommand(''ping'')"']
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+    volumes:
+      - mongodb_data:/data/db
+
+    networks:
+      - trezzecloud-network
+
+
+  redis:
+    image: redis:7-alpine
+    container_name: trezzecloud-redis
+    hostname: redis
+    restart: unless-stopped
+
+
+    command: redis-server --appendonly yes
+
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+    volumes:
+      - redis_data:/data
+
+    networks:
+      - trezzecloud-network
+
+
+  azurite:
+    image: mcr.microsoft.com/azure-storage/azurite
+    container_name: trezzecloud-azurite
+    hostname: azurite
+    restart: unless-stopped
+
+
+    command: >
+      azurite
+      --blobHost 0.0.0.0
+      --queueHost 0.0.0.0
+      --tableHost 0.0.0.0
+
+    volumes:
+      - azurite_data:/data
+
+    networks:
+      - trezzecloud-network
+
 
   users-api:
     image: trezzecloud-users-api
@@ -62,11 +165,10 @@ services:
     depends_on:
       rabbitmq:
         condition: service_healthy
+
       sqlserver:
         condition: service_healthy
 
-    ports:
-      - "8081:8080"
 
     environment:
       ASPNETCORE_ENVIRONMENT: Development
@@ -78,12 +180,14 @@ services:
       RabbitMq__Password: ${RABBITMQ_PASSWORD:-guest}
 
       AdminUser__Password: ${USERS_ADMIN_PASSWORD:-Admin@123}
+
       Jwt__Issuer: ${JWT_ISSUER:-TrezzeCloud}
       Jwt__Audience: ${JWT_AUDIENCE:-TrezzeCloud}
-      Jwt__SecretKey: ${JWT_SECRET_KEY:-SUPER_SECRET_KEY_123456789_SUPER_SECRET_KEY}
+      Jwt__SecretKey: ${JWT_SECRET_KEY:?Run scripts/prepare-local.ps1 first}
 
     networks:
       - trezzecloud-network
+
 
   catalog-api:
     image: trezzecloud-catalog-api
@@ -96,16 +200,26 @@ services:
     depends_on:
       rabbitmq:
         condition: service_healthy
+
       sqlserver:
         condition: service_healthy
 
-    ports:
-      - "8082:8080"
+      mongodb:
+        condition: service_healthy
+
+      redis:
+        condition: service_healthy
+
 
     environment:
       ASPNETCORE_ENVIRONMENT: Development
 
       ConnectionStrings__CatalogDatabase: ${CATALOG_CONNECTION_STRING:-Server=sqlserver;Database=TrezzeCloudCatalog;User Id=sa;Password=Your_password123;TrustServerCertificate=True}
+
+      MongoDb__ConnectionString: ${MONGO_CONNECTION_STRING:-mongodb://admin:admin123@mongodb:27017/?authSource=admin}
+      MongoDb__DatabaseName: ${MONGO_DATABASE_NAME:-TrezzeCloudCatalog}
+
+      Redis__ConnectionString: ${REDIS_CONNECTION_STRING:-redis:6379}
 
       RabbitMq__Host: ${RABBITMQ_HOST:-rabbitmq}
       RabbitMq__Username: ${RABBITMQ_USERNAME:-guest}
@@ -113,10 +227,11 @@ services:
 
       Jwt__Issuer: ${JWT_ISSUER:-TrezzeCloud}
       Jwt__Audience: ${JWT_AUDIENCE:-TrezzeCloud}
-      Jwt__SecretKey: ${JWT_SECRET_KEY:-SUPER_SECRET_KEY_123456789_SUPER_SECRET_KEY}
+      Jwt__SecretKey: ${JWT_SECRET_KEY:?Run scripts/prepare-local.ps1 first}
 
     networks:
       - trezzecloud-network
+
 
   payments-api:
     image: trezzecloud-payments-api
@@ -130,8 +245,6 @@ services:
       rabbitmq:
         condition: service_healthy
 
-    ports:
-      - "8083:8080"
 
     environment:
       ASPNETCORE_ENVIRONMENT: Development
@@ -143,34 +256,40 @@ services:
     networks:
       - trezzecloud-network
 
-  notifications-api:
-    image: trezzecloud-notifications-api
-    container_name: trezzecloud-notifications-api
+
+  notifications-functions:
+    container_name: trezzecloud-notifications-functions
     restart: unless-stopped
 
     build:
-      context: ../TrezzeCloud.NotificationsAPI
+      context: ../TrezzeCloud.Notifications.Functions
+      dockerfile: Dockerfile
 
     depends_on:
       rabbitmq:
         condition: service_healthy
 
-    ports:
-      - "8084:8080"
+      azurite:
+        condition: service_started
 
     environment:
-      ASPNETCORE_ENVIRONMENT: Development
+      FUNCTIONS_WORKER_RUNTIME: dotnet-isolated
 
-      RabbitMq__Host: ${RABBITMQ_HOST:-rabbitmq}
-      RabbitMq__Username: ${RABBITMQ_USERNAME:-guest}
-      RabbitMq__Password: ${RABBITMQ_PASSWORD:-guest}
+      RabbitMqConnection: ${RABBITMQ_CONNECTION:-amqp://guest:guest@rabbitmq:5672/}
+
+      AzureWebJobsStorage: "DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;BlobEndpoint=http://azurite:10000/devstoreaccount1;QueueEndpoint=http://azurite:10001/devstoreaccount1;TableEndpoint=http://azurite:10002/devstoreaccount1"
 
     networks:
       - trezzecloud-network
 
+
 networks:
   trezzecloud-network:
+
 
 volumes:
   rabbitmq_data:
   sqlserver_data:
+  mongodb_data:
+  redis_data:
+  azurite_data:

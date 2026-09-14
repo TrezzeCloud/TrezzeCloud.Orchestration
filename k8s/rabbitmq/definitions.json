@@ -1,0 +1,58 @@
+{
+  "exchanges": [
+    {
+      "name": "TrezzeCloud.Contracts.Events:UserCreatedEvent",
+      "vhost": "/",
+      "type": "fanout",
+      "durable": true,
+      "auto_delete": false,
+      "internal": false,
+      "arguments": {}
+    },
+    {
+      "name": "TrezzeCloud.Contracts.Events:PaymentProcessedEvent",
+      "vhost": "/",
+      "type": "fanout",
+      "durable": true,
+      "auto_delete": false,
+      "internal": false,
+      "arguments": {}
+    }
+  ],
+
+  "queues": [
+    {
+      "name": "notifications-user-created",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {}
+    },
+    {
+      "name": "notifications-payment-processed",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {}
+    }
+  ],
+
+  "bindings": [
+    {
+      "source": "TrezzeCloud.Contracts.Events:UserCreatedEvent",
+      "vhost": "/",
+      "destination": "notifications-user-created",
+      "destination_type": "queue",
+      "routing_key": "",
+      "arguments": {}
+    },
+    {
+      "source": "TrezzeCloud.Contracts.Events:PaymentProcessedEvent",
+      "vhost": "/",
+      "destination": "notifications-payment-processed",
+      "destination_type": "queue",
+      "routing_key": "",
+      "arguments": {}
+    }
+  ]
+}

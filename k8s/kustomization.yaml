@@ -1,0 +1,26 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - sqlserver/sqlserver.yaml
+  - rabbitmq/rabbitmq.yaml
+  - mongodb/mongodb.yaml
+  - redis/redis.yaml
+  - users-api/users-api.yaml
+  - catalog-api/catalog-api.yaml
+  - payments-api/payments-api.yaml
+  - kong/Kong.yaml
+  - kong/api-ingress-policy.yaml
+configMapGenerator:
+  - name: kong-declarative-config
+    files:
+      - kong/routes.yaml
+      - kong/start-kong.sh
+  - name: rabbitmq-config
+    files:
+      - rabbitmq/rabbitmq.conf
+      - rabbitmq/definitions.json
+      - rabbitmq/start-rabbitmq.sh
+secretGenerator:
+  - name: jwt-secret
+    envs:
+      - jwt.env

@@ -6,8 +6,6 @@ data:
   ASPNETCORE_ENVIRONMENT: "Development"
   RabbitMq__Host: "rabbitmq"
   RabbitMq__Username: "guest"
-  Jwt__Issuer: "TrezzeCloud"
-  Jwt__Audience: "TrezzeCloud"
   AdminUser__Name: "TrezzeCloud Admin"
   AdminUser__Email: "admin@trezzecloud.com"
 ---
@@ -19,7 +17,6 @@ type: Opaque
 stringData:
   ConnectionStrings__UsersDatabase: "Server=sqlserver;Database=TrezzeCloudUsers;User Id=sa;Password=Your_password123;TrustServerCertificate=True"
   RabbitMq__Password: "guest"
-  Jwt__SecretKey: "SUPER_SECRET_KEY_123456789_SUPER_SECRET_KEY"
   AdminUser__Password: "Admin@123"
 ---
 apiVersion: apps/v1
@@ -49,16 +46,17 @@ spec:
                 name: users-api-config
             - secretRef:
                 name: users-api-secret
+            - secretRef:
+                name: jwt-secret
 ---
 apiVersion: v1
 kind: Service
 metadata:
   name: users-api
 spec:
-  type: NodePort
+  type: ClusterIP
   selector:
     app: users-api
   ports:
-    - port: 80
+    - port: 8080
       targetPort: 8080
-      nodePort: 30081

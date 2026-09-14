@@ -1,0 +1,72 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kong
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kong
+  template:
+    metadata:
+      labels:
+        app: kong
+    spec:
+      securityContext:
+        fsGroup: 1000
+      containers:
+        - name: kong
+          image: kong:3.6
+          command: [/bin/sh, /kong/template/start-kong.sh]
+          env:
+            - name: KONG_DATABASE
+              value: "off"
+            - name: KONG_DECLARATIVE_CONFIG
+              value: /kong/runtime/kong.yml
+            - name: KONG_ADMIN_LISTEN
+              value: "off"
+            - name: KONG_PROXY_LISTEN
+              value: 0.0.0.0:8000
+            - name: JWT_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: jwt-secret
+                  key: JWT_SECRET_KEY
+            - name: JWT_ISSUER
+              valueFrom:
+                secretKeyRef:
+                  name: jwt-secret
+                  key: JWT_ISSUER
+          ports:
+            - containerPort: 8000
+          readinessProbe:
+            tcpSocket:
+              port: 8000
+            initialDelaySeconds: 10
+          volumeMounts:
+            - name: kong-config
+              mountPath: /kong/template
+              readOnly: true
+            - name: kong-runtime
+              mountPath: /kong/runtime
+      volumes:
+        - name: kong-config
+          configMap:
+            name: kong-declarative-config
+        - name: kong-runtime
+          emptyDir:
+            medium: Memory
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: kong
+spec:
+  selector:
+    app: kong
+  type: NodePort
+  ports:
+    - name: proxy
+      port: 8000
+      targetPort: 8000
+      nodePort: 30090
