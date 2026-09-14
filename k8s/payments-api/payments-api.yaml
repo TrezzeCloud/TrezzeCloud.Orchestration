@@ -28,6 +28,9 @@ spec:
     metadata:
       labels:
         app: payments-api
+        admission.datadoghq.com/enabled: "true"
+      annotations:
+        admission.datadoghq.com/dotnet-lib.version: "3"
     spec:
       containers:
         - name: payments-api
