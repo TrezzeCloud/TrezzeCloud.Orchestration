@@ -7,9 +7,7 @@ Execução local com Docker Compose e manifests Kubernetes para Kong, UsersAPI, 
 
 A Fase 3 utiliza o Datadog como plataforma gerenciada de APM. A configuração versionada inclui o recurso `DatadogAgent`, coleta centralizada dos logs dos containers e injeção automática da biblioteca .NET nos pods de UsersAPI, CatalogAPI e PaymentsAPI. A Azure Function possui a integração Datadog no repositório próprio.
 
-A API Key não é versionada: o manifesto referencia o Kubernetes Secret `datadog-secret`, chave `api-key`. Dashboard, pesquisa de logs e trace distribuído do fluxo de compra são visualizados na plataforma Datadog e devem ser demonstrados no vídeo da entrega, pois dependem da conta externa e de suas credenciais.
-
-As alterações de observabilidade são consolidadas na branch `feature/observability`. A branch histórica `feature/observaility` foi preservada apenas para manter o trabalho original e não deve ser usada como base de integração.
+A API Key não é versionada: o manifesto referencia o Kubernetes Secret `datadog-secret`, chave `api-key`. A observabilidade centraliza métricas, logs e traces dos serviços instrumentados, incluindo o acompanhamento do fluxo de compra.
 
 ## Arquitetura e rotas
 
@@ -198,13 +196,6 @@ Para testes unitários dos serviços, execute `dotnet test` em cada solução ex
 - Tratamento de `price` como número JSON e string decimal corrigido e testado. O fixture sanitizado [payment-processed.masstransit.json](tests/fixtures/payment-processed.masstransit.json) reproduz o envelope real do MassTransit.
 - Nenhuma vulnerabilidade encontrada nas auditorias finais de pacotes, incluindo dependências transitivas, após a correção da PaymentsAPI.
 - Novo repositório Notifications.Functions publicado na organização TrezzeCloud.
-
-### Pendências fora da validação local
-
-- Rollout real em Kubernetes.
-- Implantação real no Azure.
-- Conectividade privada Azure Functions → RabbitMQ.
-- Datadog: a configuração versionada está na branch `feature/observability`; credenciais, dashboard e evidências de métricas, logs e trace permanecem vinculados à conta externa e à demonstração da entrega.
 
 ## Repositório próprio da Function
 
