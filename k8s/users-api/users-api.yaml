@@ -35,6 +35,9 @@ spec:
     metadata:
       labels:
         app: users-api
+        admission.datadoghq.com/enabled: "true"
+      annotations:
+        admission.datadoghq.com/dotnet-lib.version: "3"
     spec:
       containers:
         - name: users-api
