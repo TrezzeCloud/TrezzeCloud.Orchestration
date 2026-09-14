@@ -6,6 +6,8 @@ data:
   ASPNETCORE_ENVIRONMENT: "Development"
   RabbitMq__Host: "rabbitmq"
   RabbitMq__Username: "guest"
+  Jwt__Issuer: "TrezzeCloud"
+  Jwt__Audience: "TrezzeCloud"
   AdminUser__Name: "TrezzeCloud Admin"
   AdminUser__Email: "admin@trezzecloud.com"
 ---
@@ -32,6 +34,9 @@ spec:
     metadata:
       labels:
         app: users-api
+        admission.datadoghq.com/enabled: "true"
+      annotations:
+        admission.datadoghq.com/dotnet-lib.version: "3"
     spec:
       containers:
         - name: users-api
