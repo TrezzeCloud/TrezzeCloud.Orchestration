@@ -1,6 +1,15 @@
 # TrezzeCloud.Orchestration — Fase 3
 
-Execução local com Docker Compose e manifests Kubernetes para Kong, UsersAPI, CatalogAPI, PaymentsAPI, SQL Server, RabbitMQ, MongoDB e Redis. Notificações usam Azure Functions: no Compose, o host isolated roda em container com Azurite; para Kubernetes, a estratégia é implantar a Function no Azure, fora do cluster. Não há stack de observabilidade nesta etapa.
+Execução local com Docker Compose e manifests Kubernetes para Kong, UsersAPI, CatalogAPI, PaymentsAPI, SQL Server, RabbitMQ, MongoDB e Redis. Notificações usam Azure Functions: no Compose, o host isolated roda em container com Azurite; para Kubernetes, a estratégia é implantar a Function no Azure, fora do cluster. A opção de observabilidade escolhida para a Fase 3 é o Datadog.
+
+
+## Observabilidade com Datadog
+
+A Fase 3 utiliza o Datadog como plataforma gerenciada de APM. A configuração versionada inclui o recurso `DatadogAgent`, coleta centralizada dos logs dos containers e injeção automática da biblioteca .NET nos pods de UsersAPI, CatalogAPI e PaymentsAPI. A Azure Function possui a integração Datadog no repositório próprio.
+
+A API Key não é versionada: o manifesto referencia o Kubernetes Secret `datadog-secret`, chave `api-key`. Dashboard, pesquisa de logs e trace distribuído do fluxo de compra são visualizados na plataforma Datadog e devem ser demonstrados no vídeo da entrega, pois dependem da conta externa e de suas credenciais.
+
+As alterações de observabilidade são consolidadas na branch `feature/observability`. A branch histórica `feature/observaility` foi preservada apenas para manter o trabalho original e não deve ser usada como base de integração.
 
 ## Arquitetura e rotas
 
@@ -195,7 +204,7 @@ Para testes unitários dos serviços, execute `dotnet test` em cada solução ex
 - Rollout real em Kubernetes.
 - Implantação real no Azure.
 - Conectividade privada Azure Functions → RabbitMQ.
-- Observabilidade: explicitamente fora desta etapa; nenhuma stack foi implementada.
+- Datadog: a configuração versionada está na branch `feature/observability`; credenciais, dashboard e evidências de métricas, logs e trace permanecem vinculados à conta externa e à demonstração da entrega.
 
 ## Repositório próprio da Function
 
