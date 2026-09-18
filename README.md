@@ -1,6 +1,13 @@
 # TrezzeCloud.Orchestration — Fase 3
 
-Execução local com Docker Compose e manifests Kubernetes para Kong, UsersAPI, CatalogAPI, PaymentsAPI, SQL Server, RabbitMQ, MongoDB e Redis. Notificações usam Azure Functions: no Compose, o host isolated roda em container com Azurite; para Kubernetes, a estratégia é implantar a Function no Azure, fora do cluster. Não há stack de observabilidade nesta etapa.
+Execução local com Docker Compose e manifests Kubernetes para Kong, UsersAPI, CatalogAPI, PaymentsAPI, SQL Server, RabbitMQ, MongoDB e Redis. Notificações usam Azure Functions: no Compose, o host isolated roda em container com Azurite; para Kubernetes, a estratégia é implantar a Function no Azure, fora do cluster. A opção de observabilidade escolhida para a Fase 3 é o Datadog.
+
+
+## Observabilidade com Datadog
+
+A Fase 3 utiliza o Datadog como plataforma gerenciada de APM. A configuração versionada inclui o recurso `DatadogAgent`, coleta centralizada dos logs dos containers e injeção automática da biblioteca .NET nos pods de UsersAPI, CatalogAPI e PaymentsAPI. A Azure Function possui a integração Datadog no repositório próprio.
+
+A API Key não é versionada: o manifesto referencia o Kubernetes Secret `datadog-secret`, chave `api-key`. A observabilidade centraliza métricas, logs e traces dos serviços instrumentados, incluindo o acompanhamento do fluxo de compra.
 
 ## Arquitetura e rotas
 
@@ -189,13 +196,6 @@ Para testes unitários dos serviços, execute `dotnet test` em cada solução ex
 - Tratamento de `price` como número JSON e string decimal corrigido e testado. O fixture sanitizado [payment-processed.masstransit.json](tests/fixtures/payment-processed.masstransit.json) reproduz o envelope real do MassTransit.
 - Nenhuma vulnerabilidade encontrada nas auditorias finais de pacotes, incluindo dependências transitivas, após a correção da PaymentsAPI.
 - Novo repositório Notifications.Functions publicado na organização TrezzeCloud.
-
-### Pendências fora da validação local
-
-- Rollout real em Kubernetes.
-- Implantação real no Azure.
-- Conectividade privada Azure Functions → RabbitMQ.
-- Observabilidade: explicitamente fora desta etapa; nenhuma stack foi implementada.
 
 ## Repositório próprio da Function
 
