@@ -4,10 +4,10 @@ Este diretório prepara somente UsersAPI, SQL Server e RabbitMQ, sem alterar os 
 
 ## Preparação
 
-1. Atualizar a UsersAPI para a branch `feature/fase4-ci`.
+1. Atualizar a UsersAPI para a branch `main`.
 2. Executar os testes de .NET e publicar uma imagem nova usando `scripts/publish-acr.ps1` da UsersAPI.
 3. Anotar o endereço completo da imagem publicado pelo script. A imagem antiga `fase4-58e32f7` **não** contém a correção que desabilita o usuário de teste no ambiente Production.
-4. Atualizar a branch `feature/fase4-infra` da Orchestration.
+4. Atualizar a branch `main` da Orchestration.
 5. Conferir o contexto kubectl para não publicar no cluster errado.
 
 Na pasta raiz da Orchestration, com o AKS iniciado:
@@ -47,19 +47,19 @@ Para validar cadastro, persistência, JWT e autorização com credenciais descar
 
 O teste cria uma conta com e-mail aleatório, executa cadastro e login e confirma que um usuário comum não tem acesso à rota de administrador. Não imprime tokens nem senhas. O evento `UserCreatedEvent` é publicado pelo endpoint de cadastro, mas sua entrega ao consumidor ainda precisa de verificação específica.
 
-Ainda falta validar o fluxo completo com o script e conferir eventuais erros nos logs.
+O script de cadastro, login e acesso autorizado foi validado no ambiente de referencia; cada integrante deve executa-lo em sua propria assinatura e registrar a evidencia.
 
 ## Observações
 
 - `Production` é obrigatório para evitar a criação automática do usuário de teste da Fase 3.
-- A imagem deve ser nova: a alteração na inicialização da UsersAPI ainda precisa ser compilada e publicada no ACR.
+- A imagem deve ser compilada a partir da main atual e publicada no ACR da assinatura do integrante.
 - Nunca usar os manifestos de `k8s/users-api`, `k8s/sqlserver` e `k8s/rabbitmq` diretamente no Azure: eles preservam configurações locais de desenvolvimento.
 - Não execute `kubectl apply -f users-api.yaml` manualmente: o manifesto tem um placeholder de imagem resolvido pelo script.
 - A primeira instalação gera dados e senhas novos. Se apagar o Secret e mantiver o PVC do SQL Server, precisará restaurar as credenciais existentes ou recriar a instância.
 - A imagem SQL Server utiliza a edição Developer para ambiente de testes, não produção.
 - Reiniciar o pod de RabbitMQ pode apagar mensagens, porque não há PVC nesta primeira etapa.
 - O ambiente continua sujeito às cobranças de VM, disco, registry e rede.
-- Os manifestos são um smoke test incremental. Não representam ainda toda a implantação da Fase 4: faltam CatalogAPI, MongoDB, Redis, busca, Kong, pipelines e notificações.
+- Estes manifests cuidam apenas da UsersAPI, SQL e RabbitMQ. Consulte o guia completo em ../../infra/azure/GUIA-REPRODUCAO-E-VALIDACAO.md (caminho a partir da raiz Orchestration). MongoDB, Redis, CatalogAPI, busca e Ingress sao implantados separadamente.
 
 ## Interrupção
 
