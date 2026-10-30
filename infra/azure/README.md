@@ -13,7 +13,7 @@ O código da infraestrutura não depende de uma assinatura específica. A assina
 
 A implantação dos microsserviços, bancos, Gateway, busca e Azure Functions será adicionada nas próximas etapas.
 
-A assinatura usada nos testes permite apenas eastus2, southcentralus, chilecentral, canadacentral e mexicocentral. Vamos começar por East US 2. A região continua sendo um parâmetro, pois outras assinaturas podem ter políticas diferentes.
+A assinatura usada nos testes permite apenas eastus2, southcentralus, chilecentral, canadacentral e mexicocentral. A primeira validação será feita em Canada Central, onde o tamanho Standard_D4_v4 apareceu sem restrições e a família Dv4 tem quota de 4 vCPUs. Um único nó é experimental: a validação ARM não garante aceitação ou provisionamento pelo AKS. A região continua sendo um parâmetro, pois outras assinaturas podem ter políticas diferentes.
 
 ## Validação inicial
 
@@ -27,12 +27,12 @@ az bicep build --file infra/azure/main.bicep
 
 Antes de provisionar, verificar a disponibilidade da VM escolhida, a quota da assinatura e os preços na região. O SKU deve ser informado explicitamente. Uma configuracao de um unico no e apenas tentativa para demonstracao: a API do AKS pode recusar a contagem de nos ou o SKU, mesmo que a VM esteja na lista.
 
-Para a assinatura de testes, o Resource Group e os recursos devem ficar em uma região permitida. O grupo de testes criado anteriormente em Brazil South não deve ser usado sem informar explicitamente outra região para os recursos.
+Para a assinatura de testes, o Resource Group e os recursos devem ficar em uma região permitida. O grupo de testes criado anteriormente em Brazil South não deve ser reutilizado. Crie um novo grupo em Canada Central e valide o template antes de executar o script de implantação.
 
 Na raiz do repositório:
 
 ```powershell
-./infra/azure/deploy.ps1 -MemberId testeus2 -SubscriptionId "<subscription-id>" -Location eastus2 -VmSize "<sku-confirmado>"
+./infra/azure/deploy.ps1 -MemberId testeus2 -SubscriptionId "<subscription-id>" -Location canadacentral -VmSize "Standard_D4_v4"
 ```
 
 O script mostra o plano de implantação e pede confirmação antes de criar o AKS e o ACR.
