@@ -191,23 +191,23 @@ Estes resultados foram observados no AKS da assinatura de referencia e **nao sub
 | Redis | Chave de cache com TTL de 219 s; invalidacao comprovada com TTL=-2 apos create e update |
 | Teste funcional integrado | Login Admin, jogo criado no SQL (ID eac39653-ccf0-4700-a7b6-4c8614bd28a2), avaliacao Mongo HTTP 201, titulo atualizado HTTP 204, JWT da UsersAPI aceito pela CatalogAPI |
 | CI/CD CatalogAPI com busca Elasticsearch integrada a main | GitHub Actions [#41129592869](https://github.com/TrezzeCloud/TrezzeCloud.CatalogAPI/actions/runs/41129592869) aprovado (build, testes, busca em motor real de CI, envio ACR e rollout AKS) |
-| Busca em Elasticsearch gerenciado | **Ainda nao executada** |
+| Busca em Elasticsearch gerenciado | **Aprovada em 30/10/2026**: Elastic Cloud Serverless no AKS; reindexacao de 12 jogos, fuzzy search, update e desativacao |
 | Implantacao em uma assinatura Azure independente com forks GitHub | **Ainda nao executada** |
 
-Um resultado "aprovado" so vale para o escopo indicado: a consulta Mongo HTTP 200 isolada nao comprova gravacao, que foi validada no teste integrado. O teste de Elasticsearch real em container de CI nao substitui a instancia gerenciada.
+**Validacao adicional de 30/10/2026:** `validate-cloud-fase4.ps1 -RequireElasticSecret` confirmou assinatura correta, AKS Running, ACR, nodes Ready, seis Deployments 1/1 Ready, PVCs SQL/Mongo Bound, Ingress Traefik em modo `ClusterIP` e presenca das chaves Elasticsearch no Secret. `test-search-integrated.ps1` concluiu com `TESTE ELASTICSEARCH GERENCIADO APROVADO`. O teste de CI em container nao substitui o teste gerenciado — ambos foram executados separadamente. Um resultado "aprovado" so vale para o escopo indicado: a consulta Mongo HTTP 200 isolada nao comprova gravacao, que foi validada no teste integrado. A validacao estrutural nao substitui o teste HTTP externo do Ingress nem o live deploy do pipeline.
 
-### Provisionar Elastic Cloud Hosted para o teste final
+### Provisionar Elastic Cloud para o teste final
 
-Use **Elastic Cloud Hosted** (deployment Elasticsearch) para maximizar compatibilidade com a API REST de indices, documentos e busca usada pela CatalogAPI. Evite selecionar um projeto Serverless apenas por conveniencia: ele e um modelo diferente e nao foi validado por este projeto.
+**Elastic Cloud Serverless no Azure (eastus2) foi validado em 30/10/2026** com a CatalogAPI executando no AKS em Canada Central. Os fluxos reais de indexacao, consulta fuzzy, atualizacao e desativacao foram aprovados. Elastic Cloud Hosted tambem e uma opcao, mas esta evidencia corresponde especificamente a **Serverless**, nao a Hosted. Cada integrante deve provisionar sua propria instancia e validar as condicoes de custo e trial.
 
-1. Acesse [Elastic Cloud](https://cloud.elastic.co/), crie a organizacao e confira as condicoes da avaliacao e da cobranca antes de ativar.
-2. Selecione **Create deployment** e a visualizacao Elasticsearch/Search. Prefira provedor e regiao proximos ao AKS, desde que estejam disponiveis. Crie o deployment e guarde as credenciais administrativas somente em local seguro.
-3. No deployment, abra **Connection details > Endpoints** (ou **Manage > Application endpoints**) e copie o endereco HTTPS especifico de **Elasticsearch**, nao o endereco Kibana.
-4. No menu **Connection details > API key**, crie uma chave propria de teste, em formato **Encoded for Elasticsearch REST API requests**. Nao use uma Elastic Cloud *organization API key* para um deployment Hosted; elas nao autenticam APIs do Elasticsearch Hosted. Guarde a chave fora do Git, dos logs e de mensagens.
+1. Acesse [Elastic Cloud](https://cloud.elastic.co/), crie a organizacao e confira as condicoes de avaliacao e cobranca antes de ativar.
+2. Crie um projeto **Elasticsearch Serverless** (configuracao validada) ou um deployment **Hosted** (alternativa a validar). Escolha uma regiao disponivel para o provedor, lembrando que a lista de regioes varia conforme a modalidade; a validacao do grupo usou Azure eastus2.
+3. Em **Connection details > Endpoints**, copie o endpoint HTTPS especifico do Elasticsearch, nao o endereco Kibana.
+4. Em **Connection details > API key**, crie uma chave propria de integracao em formato **Encoded** para a API REST. Chaves de organizacao e chaves de acesso a dados podem ter finalidades distintas. Nao coloque chaves em Git, logs, screenshots ou mensagens.
 5. Habilite a CatalogAPI pelo `configure-catalog-search.ps1` do passo 6 e rode `test-search-integrated.ps1`. Esperado: `TESTE ELASTICSEARCH GERENCIADO APROVADO`.
 6. No encerramento, revogue a chave, remova os recursos Elastic Cloud conforme a interface e valide se existe assinatura ou cobranca separada.
 
-O trial padrao informado pela Elastic e de **14 dias**, separado da assinatura Azure for Students. Mesmo durante o trial, verifique limitacoes e dados de faturamento. Documentacao oficial: [Criar deployment](https://www.elastic.co/docs/deploy-manage/deploy/elastic-cloud/create-an-elastic-cloud-hosted-deployment), [Obter endpoint/chave](https://www.elastic.co/docs/solutions/search/set-up/api-key-and-endpoints), [Condicoes do trial](https://www.elastic.co/docs/deploy-manage/deploy/elastic-cloud/create-an-organization).
+O trial da Elastic e independente da assinatura Azure for Students; confira a duracao e as condicoes da modalidade contratada, bem como eventuais cobrancas. Documentacao oficial: [Criar deployment Hosted](https://www.elastic.co/docs/deploy-manage/deploy/elastic-cloud/create-an-elastic-cloud-hosted-deployment), [Obter endpoint/chave](https://www.elastic.co/docs/solutions/search/set-up/api-key-and-endpoints), [Condicoes do trial](https://www.elastic.co/docs/deploy-manage/deploy/elastic-cloud/create-an-organization).
 
 ## 8. Checklist de evidencias, antes de apagar
 
