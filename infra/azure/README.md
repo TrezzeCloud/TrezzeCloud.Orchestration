@@ -11,7 +11,7 @@ O código da infraestrutura não depende de uma assinatura específica. A assina
 - Scripts PowerShell para criar e excluir o Resource Group.
 - Workflow para compilar os arquivos Bicep.
 
-A UsersAPI já foi validada no AKS com SQL Server e RabbitMQ. CatalogAPI, MongoDB e Redis foram implantados em `fcg-fase4`, com os três pods `Ready` e PVC do MongoDB `Bound`. Foram concluídos testes funcionais de leitura, cadastro e atualização, incluindo SQL Server, Redis, MongoDB e autenticação JWT compartilhada. Pipelines completos de UsersAPI e CatalogAPI foram validados. A busca Elasticsearch está implementada em uma feature da CatalogAPI e aguarda teste com serviço gerenciado. O ingress HTTPS está preparado para a próxima validação, e Azure Functions ainda será revisado conforme o escopo da fase.
+Os seis Deployments (SQL Server, RabbitMQ, UsersAPI, MongoDB, Redis, CatalogAPI) foram validados 1/1 Ready no AKS e os PVCs SQL/Mongo ficaram Bound. As duas APIs foram publicadas via GitHub Actions com rolling update. A busca avançada foi integrada a main da CatalogAPI; a integracao foi aprovada contra Elasticsearch real efemero no CI, mas ainda exige teste com Elastic Cloud/OpenSearch **gerenciado**. O Ingress Traefik HTTPS foi validado em modo privado e externo, com IP temporario posteriormente liberado. Azure Functions pertencem a etapa anterior e nao sao novo requisito obrigatorio desta fase. Consulte [GUIA-REPRODUCAO-E-VALIDACAO.md](GUIA-REPRODUCAO-E-VALIDACAO.md) antes de implantar ou apagar recursos.
 
 A assinatura usada nos testes permite apenas eastus2, southcentralus, chilecentral, canadacentral e mexicocentral. A validação e o provisionamento de AKS com um nó Standard_D4_v4 e ACR Basic foram concluídos em Canada Central nesta assinatura. O nó ficou `Ready` e os pods de sistema estavam `Running`. Esse resultado não garante a mesma configuração em outras assinaturas. A região continua sendo um parâmetro, pois outras assinaturas podem ter políticas diferentes.
 
@@ -72,7 +72,7 @@ O script solicita a confirmação do nome do Resource Group. A exclusão remove 
 
 ## Custos e limitações
 
-O grupo utiliza assinaturas Azure for Students, cada uma com seu próprio crédito de US$ 100. O desenvolvimento e os testes iniciais serão feitos em uma única assinatura. Depois da validação, será preparado um manual separado para reproduzir o ambiente nas demais contas.
+O grupo utiliza assinaturas Azure for Students independentes. O guia de reproducao desta pasta descreve os comandos, os pontos de verificacao e as ressalvas de cota, permissoes e GitHub Actions de cada conta. Nao compartilhe ambientes GitHub azure-demo com colegas em deploys simultaneos.
 
 O AKS Free não inclui gratuitamente as VMs, discos, rede ou o ACR. A infraestrutura deve permanecer ativa somente durante os testes. Conferir o saldo e o consumo no Cost Management.
 
@@ -84,4 +84,4 @@ A UsersAPI possui `scripts/publish-acr.ps1` na branch `main`. O script autentica
 
 Créditos Azure for Students não cobrem ofertas do Azure Marketplace. Isso precisa ser considerado na escolha do serviço gerenciado de Elasticsearch. O RabbitMQ Trigger das Azure Functions exige um plano de hospedagem compatível e também pode representar custo significativo.
 
-**Status:** AKS, ACR, UsersAPI, SQL Server e RabbitMQ funcionando. Swagger HTTP 200, acesso sem autenticação HTTP 401 e testes de cadastro, login e permissão concluídos (401/403). CatalogAPI, MongoDB e Redis implantados; testes integrados de leitura, cadastro/atualização, JWT entre APIs, avaliação em MongoDB e invalidação do Redis aprovados em 30/10/2026. A exposição externa e a integração Elasticsearch com serviço gerenciado ainda dependem de validação, apesar da infraestrutura e do código já preparados.
+**Status em 30/10/2026:** os seis Deployments de demonstracao estavam Ready e UsersAPI/CatalogAPI passaram por CI/CD e rolling update com sucesso. O Ingress HTTPS externo respondeu HTTP 200 (CatalogAPI) / 401 (UsersAPI), depois foi convertido para ClusterIP; o IP publico temporario foi liberado. Busca fuzzy em Elasticsearch real foi aprovada no CI da CatalogAPI, mas a validacao com instancia **gerenciada**, o live deploy para o video e a reproducao do zero por outro integrante continuam pendentes. O roteiro e checklist estao em [GUIA-REPRODUCAO-E-VALIDACAO.md](GUIA-REPRODUCAO-E-VALIDACAO.md).
