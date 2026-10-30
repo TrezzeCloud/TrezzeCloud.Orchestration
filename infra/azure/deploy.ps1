@@ -15,12 +15,12 @@ $availableSku = az vm list-skus --location $Location --resource-type virtualMach
 if ($LASTEXITCODE -ne 0 -or -not $availableSku) { throw "VM $VmSize nao esta disponivel na consulta de SKUs para $Location. Nenhum recurso foi criado." }
 Write-Host 'A listagem de SKUs nao garante quota ou aceitacao pelo AKS.'
 Write-Host 'ATENCAO: recursos cobram mesmo com plano AKS Free. Consulte preco e quota antes de criar.'
-if ((Read-Host 'Digite CRIAR') -cne 'CRIAR') { throw 'Cancelado' }
+if ((Read-Host 'Digite CRIAR para continuar') -ne 'CRIAR') { Write-Host 'Operacao cancelada.'; return }
 az group create -n $rg -l $Location -o none
 if ($LASTEXITCODE -ne 0) { throw 'Falha ao criar RG' }
 az deployment group what-if -g $rg -f "$PSScriptRoot/main.bicep" -p memberId=$MemberId nodeCount=$NodeCount vmSize=$VmSize
 if ($LASTEXITCODE -ne 0) { throw 'Falha no what-if' }
-if ((Read-Host 'Confira a estimativa de custos e digite IMPLANTAR') -cne 'IMPLANTAR') { throw 'Cancelado; verifique se RG vazio deve ser removido.' }
+if ((Read-Host 'Confira os custos e digite IMPLANTAR') -ne 'IMPLANTAR') { Write-Host 'Operacao cancelada.'; return }
 az deployment group create -g $rg -f "$PSScriptRoot/main.bicep" -p memberId=$MemberId nodeCount=$NodeCount vmSize=$VmSize
 if ($LASTEXITCODE -ne 0) { throw 'Falha no deployment; revise recursos parcialmente criados.' }
 Write-Host "Criado RG $rg. Consulte AKS/ACR no portal e configure a integracao ACR conforme README."
