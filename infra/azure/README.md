@@ -13,6 +13,8 @@ O código da infraestrutura não depende de uma assinatura específica. A assina
 
 A implantação dos microsserviços, bancos, Gateway, busca e Azure Functions será adicionada nas próximas etapas.
 
+A assinatura usada nos testes permite apenas eastus2, southcentralus, chilecentral, canadacentral e mexicocentral. Vamos começar por East US 2. A região continua sendo um parâmetro, pois outras assinaturas podem ter políticas diferentes.
+
 ## Validação inicial
 
 Pré-requisitos: Azure CLI, PowerShell, kubectl e uma assinatura com permissões e quota suficientes.
@@ -25,10 +27,12 @@ az bicep build --file infra/azure/main.bicep
 
 Antes de provisionar, verificar a disponibilidade da VM escolhida, a quota da assinatura e os preços na região. O SKU deve ser informado explicitamente. Uma configuracao de um unico no e apenas tentativa para demonstracao: a API do AKS pode recusar a contagem de nos ou o SKU, mesmo que a VM esteja na lista.
 
+Para a assinatura de testes, o Resource Group e os recursos devem ficar em uma região permitida. O grupo de testes criado anteriormente em Brazil South não deve ser usado sem informar explicitamente outra região para os recursos.
+
 Na raiz do repositório:
 
 ```powershell
-./infra/azure/deploy.ps1 -MemberId fase4teste -SubscriptionId "<subscription-id>" -Location brazilsouth -VmSize "<sku-confirmado>"
+./infra/azure/deploy.ps1 -MemberId fase4teste -SubscriptionId "<subscription-id>" -Location eastus2 -VmSize "<sku-confirmado>"
 ```
 
 O script mostra o plano de implantação e pede confirmação antes de criar o AKS e o ACR.
@@ -62,4 +66,4 @@ O AKS Free não inclui gratuitamente as VMs, discos, rede ou o ACR. A infraestru
 
 Créditos Azure for Students não cobrem ofertas do Azure Marketplace. Isso precisa ser considerado na escolha do serviço gerenciado de Elasticsearch. O RabbitMQ Trigger das Azure Functions exige um plano de hospedagem compatível e também pode representar custo significativo.
 
-**Status:** build e lint realizados localmente; a configuracao de um no e experimental e ainda precisa de validacao na API Azure. Nenhum recurso foi implantado.
+**Status:** Bicep compilado localmente. A validação em Brazil South foi recusada pela política regional. A configuração de um nó permanece experimental e depende da aprovação da API do AKS. Nenhum AKS ou ACR foi provisionado.
