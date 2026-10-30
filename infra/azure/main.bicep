@@ -7,13 +7,13 @@ param memberId string
 
 param location string = resourceGroup().location
 
-@description('Quantidade de nos no pool de sistema do AKS.')
-@minValue(2)
+@description('Quantidade de nos. Um no e somente para demonstracao e pode ser recusado pelo AKS.')
+@minValue(1)
 @maxValue(3)
-param nodeCount int = 2
+param nodeCount int = 1
 
 @description('Tamanho da VM. Verifique preco e quota antes de provisionar.')
-param vmSize string = 'Standard_D4as_v5'
+param vmSize string
 
 var prefix = 'fcg-${memberId}'
 var acrName = 'acrfcg${memberId}${uniqueString(resourceGroup().id)}'
