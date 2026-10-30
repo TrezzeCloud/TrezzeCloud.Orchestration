@@ -30,7 +30,9 @@ az account show --query "{Name:name,Id:id}" -o table
 
 O script reutiliza a identidade e as credenciais federadas existentes em execuções posteriores. A assinatura ativa deve corresponder à fornecida. Ele não modifica o AKS nem inicia VMs, mas cria uma identidade gerenciada e permissões IAM, se ainda não existirem.
 
-Na assinatura de teste, o script foi executado em 30/10/2026: a identidade `id-fcg-fase4-actions`, as duas credenciais federadas e as atribuições `AcrPush` e `Azure Kubernetes Service Cluster User Role` foram criadas. Ainda falta configurar o ambiente `azure-demo` nos repositórios e validar o primeiro login pelo GitHub Actions.
+Na assinatura de teste, a identidade `id-fcg-fase4-actions` foi criada em 30/10/2026 com permissões no ACR e AKS. O primeiro deploy da UsersAPI passou na validação, mas falhou em `azure/login` com `AADSTS700213`: o GitHub emitiu um subject OIDC com IDs imutáveis, enquanto o Azure tinha o formato antigo. O script foi corrigido para atualizar as duas credenciais existentes com os subjects mostrados abaixo. É necessário executá-lo novamente na assinatura antes de repetir o deploy.
+
+Os IDs de organização e repositório usados nesses subjects pertencem aos repositórios do grupo e não à assinatura Azure de cada aluno. Ao mudar de conta Azure, reutilize os mesmos subjects para esses repositórios.
 
 As permissões atribuídas são `AcrPush` somente no ACR e `Azure Kubernetes Service Cluster User Role` somente no AKS. A autorização Kubernetes do cluster também deve permitir atualizar os Deployments. Se a assinatura ou o tenant da FIAP bloquear criação de identidade ou atribuição de papéis, não insira credenciais pessoais no YAML: será preciso avaliar outro método de autenticação.
 
@@ -54,8 +56,8 @@ O script imprime os valores necessários ao final, mas não gera nem salva senha
 As credenciais federadas usam estes subjects:
 
 ```text
-repo:TrezzeCloud/TrezzeCloud.UsersAPI:environment:azure-demo
-repo:TrezzeCloud/TrezzeCloud.CatalogAPI:environment:azure-demo
+repo:TrezzeCloud@321194422/TrezzeCloud.UsersAPI@1243857293:environment:azure-demo
+repo:TrezzeCloud@321194422/TrezzeCloud.CatalogAPI@1244703727:environment:azure-demo
 ```
 
 Em cada nova assinatura estudantil, execute a configuração na conta correspondente e substitua os segredos e as variáveis do ambiente `azure-demo`. Isso evita editar os workflows ou inserir credenciais nos commits.
