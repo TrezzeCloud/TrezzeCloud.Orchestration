@@ -38,7 +38,7 @@ O script gera senhas de MongoDB e Redis, salva as credenciais no Kubernetes Secr
 
 A CatalogAPI compilou em Release com 19 testes unitários aprovados, sem falhas. Imagem publicada no ACR: `acrfcgcanadatestec733w2tny4nm6.azurecr.io/trezzecloud-catalog-api:fase4-d7f5a4a`.
 
-A implantação Kubernetes ainda não foi executada. Os recursos MongoDB e Redis só serão criados na execução de `deploy-catalog-demo.ps1`.
+A implantação no AKS foi concluída. CatalogAPI, MongoDB e Redis ficaram `Running` e `Ready` (1/1), sem reinicializações. O PVC do MongoDB com 4 GiB ficou `Bound`, e o PVC existente do SQL Server manteve 10 GiB em `Bound`.
 
 ## Testes
 
@@ -49,7 +49,15 @@ kubectl -n fcg-fase4 logs deployment/catalog-api --tail=80
 kubectl -n fcg-fase4 port-forward svc/catalog-api 8081:8080
 ```
 
-Com o port-forward ativo, em outro terminal:
+Com o port-forward ativo, em outro terminal, rode o teste automatizado a partir da raiz da Orchestration:
+
+```powershell
+.\infra\azure\test-catalog-demo.ps1
+```
+
+O teste faz duas leituras de jogos e uma leitura de avaliações, depois consulta o TTL da chave de jogos no Redis. A gravação de avaliações no MongoDB ainda não faz parte desse primeiro teste.
+
+Para consultar os endpoints manualmente:
 
 ```powershell
 curl.exe -i http://localhost:8081/api/games
