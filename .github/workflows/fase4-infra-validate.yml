@@ -67,3 +67,10 @@ jobs:
           assert ingress["spec"].get("tls"), "TLS e obrigatorio"
           print("Ingress HTTPS e roteamento validados sem criar recursos Azure.")
           PY
+
+      - name: Validar todos os manifestos de demonstracao da Fase 4
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m pip install --quiet --break-system-packages pyyaml
+          python3 infra/azure/validate-fase4-manifests.py
