@@ -51,11 +51,11 @@
 
 ## Correcao identificada no CI da CatalogAPI
 
-**Ponto tecnico encontrado nesta auditoria:** a job publish_deploy depende de search_integration; entretanto, a configuracao da main antes da correcao nao executa search_integration em workflow_dispatch. A publicacao manual pelo botao Run workflow seria ignorada por dependencia skipped. Um PR de ajuste do workflow foi aberto: https://github.com/TrezzeCloud/TrezzeCloud.CatalogAPI/pull/6. Ele tambem inclui testes de integracao para todos os PRs contra main. **A correcao ainda nao foi integrada a main nem validada por CI na presente auditoria.** O fluxo push na main ja executava a integracao.
+**CI/CD da CatalogAPI corrigido e homologado em 30/10/2026:** o [PR #6](https://github.com/TrezzeCloud/TrezzeCloud.CatalogAPI/pull/6) corrigiu a condicao de execucao de `search_integration` para `workflow_dispatch` em `main` e para todos os PRs. A correcao foi integrada a `main` (commit `43b43b1bcbaf27da487955abd01612199b011326`). O [pipeline automatico #41140430463](https://github.com/TrezzeCloud/TrezzeCloud.CatalogAPI/actions/runs/41140430463) e o [pipeline manual #41140622341](https://github.com/TrezzeCloud/TrezzeCloud.CatalogAPI/actions/runs/41140622341) terminaram com `validate`, `search_integration` e `publish_deploy` aprovados. Esses resultados validam a conta de referencia, nao os forks independentes nem o live deploy demonstrativo no video.
 
 ## Trabalho necessario antes de considerar a entrega final encerrada
 
-- [ ] Integrar os PRs documentais aprovados a main e conferir links internos dos README.
+- [ ] Conferir os links dos READMEs tecnicos na versao consolidada de `main`.
 - [ ] Integrante/apresentador executar o guia operacional recebido separadamente com a propria assinatura, seus forks e projeto Elastic.
 - [ ] Capturar tela de AKS/ACR, 6/6 Deployments, PVC Bound, Ingress com IP publico e respostas HTTPS.
 - [ ] Guardar outputs dos testes SQL/JWT/Redis/Mongo/Elastic no ambiente do apresentador.
