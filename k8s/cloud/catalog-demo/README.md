@@ -69,6 +69,26 @@ A rota de jogos depende do SQL Server e Redis. A rota de avaliações utiliza Mo
 
 A autenticação da CatalogAPI deve usar tokens da UsersAPI porque as duas aplicações reutilizam a mesma chave JWT.
 
+## Teste integrado
+
+A implantação inicial foi validada no AKS: `GET /api/games` respondeu 200 nas duas consultas e a chave `TrezzeCloud:games:all:v2` foi encontrada no Redis com TTL de 298 segundos. A leitura de avaliações no MongoDB também respondeu 200.
+
+O consumo observado no `kubectl top pods` foi: SQL Server 794 MiB, MongoDB 225 MiB, RabbitMQ 137 MiB, UsersAPI 105 MiB, CatalogAPI 71 MiB e Redis 31 MiB.
+
+O teste de gravação e invalidação é separado e modifica os dados da demonstração. Com as duas APIs expostas somente via port-forward local:
+
+```powershell
+kubectl -n fcg-fase4 port-forward svc/users-api 8080:8080
+
+# Em outro terminal
+kubectl -n fcg-fase4 port-forward svc/catalog-api 8081:8080
+
+# Em um terceiro terminal, na raiz da Orchestration
+.\infra\azure\test-catalog-integrated.ps1
+```
+
+O script lê a senha do administrador a partir do Kubernetes Secret apenas em memória, obtém JWT na UsersAPI, cadastra/atualiza um jogo, verifica a invalidação do cache Redis, cadastra um usuário comum e grava/lê uma avaliação no MongoDB. Não imprime credenciais. Deixa um jogo, uma avaliação e um usuário de teste para conferência posterior. Precisa de permissão para consultar Secrets no namespace.
+
 ## Cuidados
 
 - O manifesto contém um placeholder para a imagem. Utilize o script; não aplique `catalog-api.yaml` isoladamente.
