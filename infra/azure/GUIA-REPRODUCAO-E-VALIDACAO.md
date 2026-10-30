@@ -176,6 +176,39 @@ kubectl -n fcg-fase4 get deployment users-api catalog-api -o wide
 
 O CI/CD ja foi aprovado na conta de referencia, mas o **teste com forks/contas independentes e um requisito de homologacao separado**. Nao confunda o teste manual via publish-acr.ps1 com o live deploy do pipeline.
 
+## Evidencias da assinatura de referencia (30/10/2026)
+
+Estes resultados foram observados no AKS da assinatura de referencia e **nao substituem a execucao individual em outras assinaturas**:
+
+| Verificacao | Resultado observado |
+|---|---|
+| AKS, ACR, contexto Kubernetes e nodes | Validacao estrutural aprovada |
+| SQL Server, RabbitMQ, UsersAPI, MongoDB, Redis e CatalogAPI | Seis Deployments 1/1 Ready |
+| PersistentVolumeClaims SQL e Mongo | Ambos Bound |
+| Ingress Traefik HTTPS interno | GET /api/games HTTP 200; GET /api/users sem JWT HTTP 401 |
+| Teste UsersAPI | Registro, login persistido no SQL, 401 sem JWT e 403 para usuario comum |
+| Teste CatalogAPI | GET /api/games HTTP 200 duas vezes; reviews HTTP 200 |
+| Redis | Chave de cache com TTL de 219 s; invalidacao comprovada com TTL=-2 apos create e update |
+| Teste funcional integrado | Login Admin, jogo criado no SQL (ID eac39653-ccf0-4700-a7b6-4c8614bd28a2), avaliacao Mongo HTTP 201, titulo atualizado HTTP 204, JWT da UsersAPI aceito pela CatalogAPI |
+| CI/CD CatalogAPI com busca Elasticsearch integrada a main | GitHub Actions [#41129592869](https://github.com/TrezzeCloud/TrezzeCloud.CatalogAPI/actions/runs/41129592869) aprovado (build, testes, busca em motor real de CI, envio ACR e rollout AKS) |
+| Busca em Elasticsearch gerenciado | **Ainda nao executada** |
+| Implantacao em uma assinatura Azure independente com forks GitHub | **Ainda nao executada** |
+
+Um resultado "aprovado" so vale para o escopo indicado: a consulta Mongo HTTP 200 isolada nao comprova gravacao, que foi validada no teste integrado. O teste de Elasticsearch real em container de CI nao substitui a instancia gerenciada.
+
+### Provisionar Elastic Cloud Hosted para o teste final
+
+Use **Elastic Cloud Hosted** (deployment Elasticsearch) para maximizar compatibilidade com a API REST de indices, documentos e busca usada pela CatalogAPI. Evite selecionar um projeto Serverless apenas por conveniencia: ele e um modelo diferente e nao foi validado por este projeto.
+
+1. Acesse [Elastic Cloud](https://cloud.elastic.co/), crie a organizacao e confira as condicoes da avaliacao e da cobranca antes de ativar.
+2. Selecione **Create deployment** e a visualizacao Elasticsearch/Search. Prefira provedor e regiao proximos ao AKS, desde que estejam disponiveis. Crie o deployment e guarde as credenciais administrativas somente em local seguro.
+3. No deployment, abra **Connection details > Endpoints** (ou **Manage > Application endpoints**) e copie o endereco HTTPS especifico de **Elasticsearch**, nao o endereco Kibana.
+4. No menu **Connection details > API key**, crie uma chave propria de teste, em formato **Encoded for Elasticsearch REST API requests**. Nao use uma Elastic Cloud *organization API key* para um deployment Hosted; elas nao autenticam APIs do Elasticsearch Hosted. Guarde a chave fora do Git, dos logs e de mensagens.
+5. Habilite a CatalogAPI pelo `configure-catalog-search.ps1` do passo 6 e rode `test-search-integrated.ps1`. Esperado: `TESTE ELASTICSEARCH GERENCIADO APROVADO`.
+6. No encerramento, revogue a chave, remova os recursos Elastic Cloud conforme a interface e valide se existe assinatura ou cobranca separada.
+
+O trial padrao informado pela Elastic e de **14 dias**, separado da assinatura Azure for Students. Mesmo durante o trial, verifique limitacoes e dados de faturamento. Documentacao oficial: [Criar deployment](https://www.elastic.co/docs/deploy-manage/deploy/elastic-cloud/create-an-elastic-cloud-hosted-deployment), [Obter endpoint/chave](https://www.elastic.co/docs/solutions/search/set-up/api-key-and-endpoints), [Condicoes do trial](https://www.elastic.co/docs/deploy-manage/deploy/elastic-cloud/create-an-organization).
+
 ## 8. Checklist de evidencias, antes de apagar
 
 Registre sem expor segredos: assinatura/regiao e AKS/ACR; seis deployments Ready; dois PVCs Bound; Ingress HTTPS interno e, na janela de demonstracao, LoadBalancer/IP externo e HTTP 200; HTTP 401 sem autenticacao; 401/403 autorizacao; testes de registro, jogos, Mongo e Redis; resultado do teste Elastic gerenciado; GitHub Actions com commit/tags e deploy success; rollout e resposta da API apos live deploy. Confirme relatorio com nomes do grupo, usernames Discord, links README, repos e video de ate 25 minutos.
