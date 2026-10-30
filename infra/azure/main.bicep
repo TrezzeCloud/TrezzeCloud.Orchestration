@@ -7,10 +7,10 @@ param memberId string
 
 param location string = resourceGroup().location
 
-@description('Quantidade de nos. Um no reduz custo, mas nao garante HA.')
-@minValue(1)
+@description('Quantidade de nos no pool de sistema do AKS.')
+@minValue(2)
 @maxValue(3)
-param nodeCount int = 1
+param nodeCount int = 2
 
 @description('Tamanho da VM. Verifique preco e quota antes de provisionar.')
 param vmSize string = 'Standard_D4as_v5'
