@@ -58,6 +58,8 @@ curl.exe -k -i "https://$ip/search?q=cybr%20drft"
 - **Seguranca:** nenhuma senha de banco nem API key em YAML/codigo; secrets no Kubernetes, identidade federada de workflow sem client secret e acesso HTTPS de demonstração.
 - **Isolamento da demonstracao:** AKS do video possui UsersAPI e CatalogAPI mais quatro dependencias. Os demais projetos de fases anteriores existem, mas nao estao nesses seis Deployments.
 
+**Preflight do CI:** certifique-se de que https://github.com/TrezzeCloud/TrezzeCloud.CatalogAPI/pull/6 foi revisado e integrado antes de usar Run workflow manual na CatalogAPI; sem essa correcao, a dependencia search_integration fica skipped no workflow_dispatch. O push de codigo na main ja estava contemplado, mas a correcao permite reproduzir tambem a execucao manual.
+
 ## Checklist antes de apertar Gravar
 
 - [ ] Subscription selecionada pertence ao apresentador e possui credito/quota disponivel
