@@ -6,7 +6,7 @@ param(
 
 $ErrorActionPreference = 'Stop'
 foreach ($url in @($UsersBaseUrl, $CatalogBaseUrl)) {
-    if ($url -notmatch '^http://(localhost|127\\.0\\.0\\.1):[0-9]+/?$') {
+    if ($url -notmatch '^http://(localhost|127\.0\.0\.1):[0-9]+/?$') {
         throw 'Este teste exige port-forward local. Nao envie tokens por HTTP publico.'
     }
 }
