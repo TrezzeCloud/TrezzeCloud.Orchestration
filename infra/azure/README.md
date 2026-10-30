@@ -13,7 +13,7 @@ O código da infraestrutura não depende de uma assinatura específica. A assina
 
 A implantação dos microsserviços, bancos, Gateway, busca e Azure Functions será adicionada nas próximas etapas.
 
-A assinatura usada nos testes permite apenas eastus2, southcentralus, chilecentral, canadacentral e mexicocentral. A validação e o provisionamento de AKS com um nó Standard_D4_v4 e ACR Basic foram concluídos em Canada Central nesta assinatura. Ainda é necessário verificar o estado Ready do nó. Esse resultado não garante a mesma configuração em outras assinaturas. A região continua sendo um parâmetro, pois outras assinaturas podem ter políticas diferentes.
+A assinatura usada nos testes permite apenas eastus2, southcentralus, chilecentral, canadacentral e mexicocentral. A validação e o provisionamento de AKS com um nó Standard_D4_v4 e ACR Basic foram concluídos em Canada Central nesta assinatura. O nó ficou `Ready` e os pods de sistema estavam `Running`. Esse resultado não garante a mesma configuração em outras assinaturas. A região continua sendo um parâmetro, pois outras assinaturas podem ter políticas diferentes.
 
 ## Validação inicial
 
@@ -46,7 +46,7 @@ az aks list -g $rg -o table
 az acr list -g $rg -o table
 ```
 
-O AKS foi acessado com `az aks get-credentials`. O nó de sistema foi verificado como `Ready`, os pods em `kube-system` estavam `Running` e o ACR foi confirmado como `Succeeded`. Falta vincular a identidade do kubelet ao registry e publicar as imagens.
+O AKS foi acessado com `az aks get-credentials`. O nó de sistema foi verificado como `Ready`, os pods em `kube-system` estavam `Running` e o ACR foi confirmado como `Succeeded`. O AKS foi associado ao ACR com `az aks update --attach-acr`. O teste `az aks check-acr` no Cloud Shell confirmou resolução DNS, identidade gerenciada e permissão para baixar imagens privadas. A publicação das imagens ainda está pendente.
 
 ## Remoção
 
@@ -66,4 +66,4 @@ O AKS Free não inclui gratuitamente as VMs, discos, rede ou o ACR. A infraestru
 
 Créditos Azure for Students não cobrem ofertas do Azure Marketplace. Isso precisa ser considerado na escolha do serviço gerenciado de Elasticsearch. O RabbitMQ Trigger das Azure Functions exige um plano de hospedagem compatível e também pode representar custo significativo.
 
-**Status:** AKS + ACR provisionados com sucesso em Canada Central. Kubernetes v1.36.5, nó `Ready` e pods de sistema `Running`. Pendente associação de permissões AKS–ACR e publicação das APIs.
+**Status:** AKS + ACR provisionados com sucesso em Canada Central. Kubernetes v1.36.5, nó `Ready` e pods de sistema `Running`. Associação e validação de acesso AKS–ACR concluídas no Cloud Shell; publicação das imagens e implantação dos serviços pendentes.
