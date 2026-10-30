@@ -11,7 +11,7 @@ O código da infraestrutura não depende de uma assinatura específica. A assina
 - Scripts PowerShell para criar e excluir o Resource Group.
 - Workflow para compilar os arquivos Bicep.
 
-A UsersAPI já foi validada no AKS com SQL Server e RabbitMQ. CatalogAPI, MongoDB e Redis foram implantados em `fcg-fase4`, com os três pods `Ready` e PVC do MongoDB `Bound`. Os testes funcionais e de cache ainda serão executados. Gateway, busca gerenciada, Azure Functions e pipelines completos ainda serão adicionados.
+A UsersAPI já foi validada no AKS com SQL Server e RabbitMQ. CatalogAPI, MongoDB e Redis foram implantados em `fcg-fase4`, com os três pods `Ready` e PVC do MongoDB `Bound`. Foram concluídos testes funcionais de leitura, cadastro e atualização, incluindo SQL Server, Redis, MongoDB e autenticação JWT compartilhada. Gateway, busca gerenciada, Azure Functions e pipelines completos ainda serão adicionados.
 
 A assinatura usada nos testes permite apenas eastus2, southcentralus, chilecentral, canadacentral e mexicocentral. A validação e o provisionamento de AKS com um nó Standard_D4_v4 e ACR Basic foram concluídos em Canada Central nesta assinatura. O nó ficou `Ready` e os pods de sistema estavam `Running`. Esse resultado não garante a mesma configuração em outras assinaturas. A região continua sendo um parâmetro, pois outras assinaturas podem ter políticas diferentes.
 
@@ -72,4 +72,4 @@ A UsersAPI possui `scripts/publish-acr.ps1` na branch `feature/fase4-ci`. O scri
 
 Créditos Azure for Students não cobrem ofertas do Azure Marketplace. Isso precisa ser considerado na escolha do serviço gerenciado de Elasticsearch. O RabbitMQ Trigger das Azure Functions exige um plano de hospedagem compatível e também pode representar custo significativo.
 
-**Status:** AKS, ACR, UsersAPI, SQL Server e RabbitMQ funcionando. Swagger HTTP 200, acesso sem autenticação HTTP 401 e testes de cadastro, login e permissão concluídos (401/403). CatalogAPI, MongoDB e Redis implantados; próximos testes: endpoints, Redis, MongoDB e integração JWT. Os demais requisitos da Fase 4 continuam pendentes.
+**Status:** AKS, ACR, UsersAPI, SQL Server e RabbitMQ funcionando. Swagger HTTP 200, acesso sem autenticação HTTP 401 e testes de cadastro, login e permissão concluídos (401/403). CatalogAPI, MongoDB e Redis implantados; testes integrados de leitura, cadastro/atualização, JWT entre APIs, avaliação em MongoDB e invalidação do Redis aprovados em 30/10/2026. Os demais requisitos da Fase 4 continuam pendentes.
