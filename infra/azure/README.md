@@ -48,6 +48,12 @@ az acr list -g $rg -o table
 
 O AKS foi acessado com `az aks get-credentials`. O nó de sistema foi verificado como `Ready`, os pods em `kube-system` estavam `Running` e o ACR foi confirmado como `Succeeded`. O AKS foi associado ao ACR com `az aks update --attach-acr`. O teste `az aks check-acr` no Cloud Shell confirmou resolução DNS, identidade gerenciada e permissão para baixar imagens privadas. A imagem da UsersAPI foi publicada no ACR e o deployment com SQL Server e RabbitMQ foi concluído.
 
+## CI/CD
+
+Os pipelines estão nas branches `feature/fase4-ci` dos repositórios UsersAPI e CatalogAPI. O CI executa testes e build Docker sem acesso ao Azure. A publicação no ACR e o rollout no AKS estão configurados para `main`, com autenticação OIDC e o ambiente GitHub `azure-demo`.
+
+Para configurar a identidade gerenciada, as credenciais federadas e as variáveis de cada assinatura, consulte `infra/azure/github-actions.md` e `infra/azure/setup-github-oidc.ps1`. Esses recursos ainda não foram provisionados na assinatura de testes; o AKS permanece parado.
+
 ## Remoção
 
 Ao terminar o teste:
