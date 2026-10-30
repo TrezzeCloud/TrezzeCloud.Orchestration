@@ -73,6 +73,15 @@ Em 30/10/2026, a UsersAPI concluiu a primeira execução automática após corri
 
 O PR #2 da CatalogAPI foi integrado à `main` em 30/10/2026 (commit `1450ab42e5b1bae2b2a9273208eba55acf21406d`). O workflow [run #41114425029](https://github.com/TrezzeCloud/TrezzeCloud.CatalogAPI/actions/runs/41114425029) concluiu com `success`: CI aprovado, autenticação Azure via OIDC, Docker build/push no ACR e `deployment/catalog-api` atualizado automaticamente com rollout concluído e 1/1 Ready. Imagem: `trezzecloud-catalog-api:1450ab42e5b1bae2b2a9273208eba55acf21406d`.
 
+## Validacao de execucao manual e automatica da CatalogAPI
+
+Em 30/10/2026, o [PR #6](https://github.com/TrezzeCloud/TrezzeCloud.CatalogAPI/pull/6) corrigiu o filtro `if` de `search_integration`, que anteriormente era ignorada em `workflow_dispatch` e impedia `publish_deploy` devido a dependencia `needs`. A correcao foi integrada a `main` no commit `43b43b1bcbaf27da487955abd01612199b011326`.
+
+- [GitHub Actions por push #41140430463](https://github.com/TrezzeCloud/TrezzeCloud.CatalogAPI/actions/runs/41140430463): `validate`, `search_integration` e `publish_deploy` com `success`.
+- [GitHub Actions manual #41140622341](https://github.com/TrezzeCloud/TrezzeCloud.CatalogAPI/actions/runs/41140622341): `validate`, `search_integration` e `publish_deploy` com `success` usando `workflow_dispatch` na `main`.
+
+Estes testes comprovam o pipeline na **assinatura de referencia**. Para um fork pessoal, a identidade OIDC, os Secrets e Variables do environment `azure-demo` precisam pertencer ao integrante, e a publicacao deve ser validada novamente. O live deploy em video exige tambem alterar codigo no fork e demonstrar que a nova versao aparece na API.
+
 ## 3. Preparação para a primeira publicação automática
 
 Antes de integrar os PRs à `main`:
