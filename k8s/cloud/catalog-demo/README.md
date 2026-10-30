@@ -91,6 +91,33 @@ O teste integrado foi executado com sucesso no AKS em 30/10/2026. Foi confirmado
 
 O script lê a senha do administrador a partir do Kubernetes Secret apenas em memória, não imprime credenciais e mantém um jogo, uma avaliação e um usuário de teste para conferência posterior. Requer permissão para consultar Secrets no namespace.
 
+## Busca avançada opcional com Elastic Cloud
+
+O manifesto `catalog-api.yaml` recebe `Elasticsearch__Endpoint` e `Elasticsearch__ApiKey` do Secret **opcional** `catalog-search-secrets`. Não existe cluster Elasticsearch no AKS; a exigência é usar um serviço gerenciado separado. Sem Secret, a CatalogAPI continua funcionando e `GET /search` retorna 503.
+
+Quando o grupo disponibilizar um endpoint HTTPS e uma API key válidos de um Elasticsearch gerenciado, habilite-o no cluster **do próprio integrante** usando o contexto kubectl correspondente:
+
+```powershell
+.\infra\azure\configure-catalog-search.ps1 `
+    -ExpectedContext "<nome-do-contexto-aks>" `
+    -Endpoint "https://<seu-endpoint-elastic>"
+```
+
+O script solicita a API key sem exibi-la, cria/atualiza o Secret, aplica o manifesto com a imagem **já instalada** e faz o rollout da API. Não recria bancos nem altera as configurações dos outros microsserviços. Cada integrante deve obter a própria conta/endpoint no provedor gerenciado; não compartilhe API keys entre contas.
+
+Depois da configuração:
+
+```powershell
+kubectl -n fcg-fase4 port-forward svc/catalog-api 8081:8080
+
+# Em outro terminal:
+curl.exe -i "http://localhost:8081/search?q=cybr%20drft"
+```
+
+A primeira sincronização dos jogos ocorre automaticamente e se repete a cada cinco minutos. Para forçar a indexação de registros existentes, um administrador autenticado pode chamar `POST /search/reindex`. Os resultados da busca são classificados por relevância e ignoram jogos inativos ou ainda não disponibilizados.
+
+A avaliação gratuita do Elastic Cloud é temporária; evite ativá-la antes de o integrante responsável pelos testes do serviço estar preparado. Não versione endpoints privados, senhas ou chaves.
+
 ## Cuidados
 
 - O manifesto contém um placeholder para a imagem. Utilize o script; não aplique `catalog-api.yaml` isoladamente.
@@ -98,4 +125,4 @@ O script lê a senha do administrador a partir do Kubernetes Secret apenas em me
 - O MongoDB possui volume persistente, sujeito a cobrança mesmo quando o AKS está parado.
 - Não apague o Secret do MongoDB mantendo seu PVC: as credenciais seriam perdidas.
 - Não exponha MongoDB, Redis ou SQL Server na internet.
-- A busca com Elasticsearch e os pipelines de CI/CD ainda serão adicionados.
+- Os pipelines CI/CD de UsersAPI e CatalogAPI já foram validados no AKS; a busca Elasticsearch fica opcional até ser testada com serviço externo gerenciado.
