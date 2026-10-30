@@ -13,7 +13,7 @@ O código da infraestrutura não depende de uma assinatura específica. A assina
 
 A implantação dos microsserviços, bancos, Gateway, busca e Azure Functions será adicionada nas próximas etapas.
 
-A assinatura usada nos testes permite apenas eastus2, southcentralus, chilecentral, canadacentral e mexicocentral. A primeira validação será feita em Canada Central, onde o tamanho Standard_D4_v4 apareceu sem restrições e a família Dv4 tem quota de 4 vCPUs. Um único nó é experimental: a validação ARM não garante aceitação ou provisionamento pelo AKS. A região continua sendo um parâmetro, pois outras assinaturas podem ter políticas diferentes.
+A assinatura usada nos testes permite apenas eastus2, southcentralus, chilecentral, canadacentral e mexicocentral. A validação e o provisionamento de AKS com um nó Standard_D4_v4 e ACR Basic foram concluídos em Canada Central nesta assinatura. Ainda é necessário verificar o estado Ready do nó. Esse resultado não garante a mesma configuração em outras assinaturas. A região continua sendo um parâmetro, pois outras assinaturas podem ter políticas diferentes.
 
 ## Validação inicial
 
@@ -32,7 +32,7 @@ Para a assinatura de testes, o Resource Group e os recursos devem ficar em uma r
 Na raiz do repositório:
 
 ```powershell
-./infra/azure/deploy.ps1 -MemberId testeus2 -SubscriptionId "<subscription-id>" -Location canadacentral -VmSize "Standard_D4_v4"
+./infra/azure/deploy.ps1 -MemberId canadateste -SubscriptionId "<subscription-id>" -Location canadacentral -VmSize "Standard_D4_v4"
 ```
 
 O script mostra o plano de implantação e pede confirmação antes de criar o AKS e o ACR.
@@ -40,7 +40,7 @@ O script mostra o plano de implantação e pede confirmação antes de criar o A
 Depois de provisionar:
 
 ```powershell
-$rg = "rg-fcg-fase4-testeus2"
+$rg = "rg-fcg-fase4-canadateste"
 az resource list -g $rg -o table
 az aks list -g $rg -o table
 az acr list -g $rg -o table
@@ -53,7 +53,7 @@ A configuração de acesso do AKS ao ACR e a publicação dos serviços serão i
 Ao terminar o teste:
 
 ```powershell
-./infra/azure/destroy.ps1 -MemberId testeus2 -SubscriptionId "<subscription-id>"
+./infra/azure/destroy.ps1 -MemberId canadateste -SubscriptionId "<subscription-id>"
 ```
 
 O script solicita a confirmação do nome do Resource Group. A exclusão remove também os dados armazenados nele. Verificar no Portal se o grupo foi completamente excluído.
@@ -66,4 +66,4 @@ O AKS Free não inclui gratuitamente as VMs, discos, rede ou o ACR. A infraestru
 
 Créditos Azure for Students não cobrem ofertas do Azure Marketplace. Isso precisa ser considerado na escolha do serviço gerenciado de Elasticsearch. O RabbitMQ Trigger das Azure Functions exige um plano de hospedagem compatível e também pode representar custo significativo.
 
-**Status:** Bicep compilado localmente. A validação em Brazil South foi recusada pela política regional. A configuração de um nó permanece experimental e depende da aprovação da API do AKS. Nenhum AKS ou ACR foi provisionado.
+**Status:** Bicep compilado e validado; deployment AKS + ACR concluído com Succeeded em Canada Central (um nó Standard_D4_v4). Pendente verificar acesso kubectl, saúde do nó, integração ACR e publicação das APIs.
