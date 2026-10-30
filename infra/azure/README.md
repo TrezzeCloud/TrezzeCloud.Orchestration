@@ -32,7 +32,7 @@ Para a assinatura de testes, o Resource Group e os recursos devem ficar em uma r
 Na raiz do repositório:
 
 ```powershell
-./infra/azure/deploy.ps1 -MemberId fase4teste -SubscriptionId "<subscription-id>" -Location eastus2 -VmSize "<sku-confirmado>"
+./infra/azure/deploy.ps1 -MemberId testeus2 -SubscriptionId "<subscription-id>" -Location eastus2 -VmSize "<sku-confirmado>"
 ```
 
 O script mostra o plano de implantação e pede confirmação antes de criar o AKS e o ACR.
@@ -40,7 +40,7 @@ O script mostra o plano de implantação e pede confirmação antes de criar o A
 Depois de provisionar:
 
 ```powershell
-$rg = "rg-fcg-fase4-fase4teste"
+$rg = "rg-fcg-fase4-testeus2"
 az resource list -g $rg -o table
 az aks list -g $rg -o table
 az acr list -g $rg -o table
@@ -53,7 +53,7 @@ A configuração de acesso do AKS ao ACR e a publicação dos serviços serão i
 Ao terminar o teste:
 
 ```powershell
-./infra/azure/destroy.ps1 -MemberId fase4teste -SubscriptionId "<subscription-id>"
+./infra/azure/destroy.ps1 -MemberId testeus2 -SubscriptionId "<subscription-id>"
 ```
 
 O script solicita a confirmação do nome do Resource Group. A exclusão remove também os dados armazenados nele. Verificar no Portal se o grupo foi completamente excluído.
