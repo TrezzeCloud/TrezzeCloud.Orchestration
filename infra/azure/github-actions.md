@@ -30,6 +30,8 @@ az account show --query "{Name:name,Id:id}" -o table
 
 O script reutiliza a identidade e as credenciais federadas existentes em execuções posteriores. A assinatura ativa deve corresponder à fornecida. Ele não modifica o AKS nem inicia VMs, mas cria uma identidade gerenciada e permissões IAM, se ainda não existirem.
 
+Na assinatura de teste, o script foi executado em 30/10/2026: a identidade `id-fcg-fase4-actions`, as duas credenciais federadas e as atribuições `AcrPush` e `Azure Kubernetes Service Cluster User Role` foram criadas. Ainda falta configurar o ambiente `azure-demo` nos repositórios e validar o primeiro login pelo GitHub Actions.
+
 As permissões atribuídas são `AcrPush` somente no ACR e `Azure Kubernetes Service Cluster User Role` somente no AKS. A autorização Kubernetes do cluster também deve permitir atualizar os Deployments. Se a assinatura ou o tenant da FIAP bloquear criação de identidade ou atribuição de papéis, não insira credenciais pessoais no YAML: será preciso avaliar outro método de autenticação.
 
 ## 2. Configurar o GitHub
