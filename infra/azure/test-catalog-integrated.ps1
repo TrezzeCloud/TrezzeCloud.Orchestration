@@ -1,7 +1,7 @@
 param(
     [string]$UsersBaseUrl = 'http://localhost:8080',
     [string]$CatalogBaseUrl = 'http://localhost:8081',
-    [string]$ExpectedContext = 'aks-fcg-canadateste'
+    [Parameter(Mandatory = $true)][string]$ExpectedContext
 )
 
 $ErrorActionPreference = 'Stop'
