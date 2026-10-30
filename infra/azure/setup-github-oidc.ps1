@@ -63,17 +63,23 @@ if ($LASTEXITCODE -ne 0) { throw 'Falha ao listar credenciais federadas.' }
 $existingCredentials = @($credentialsJson | ConvertFrom-Json)
 
 $repos = @(
-    @{ Name = 'usersapi-azure-demo'; Subject = 'repo:TrezzeCloud/TrezzeCloud.UsersAPI:environment:azure-demo' },
-    @{ Name = 'catalogapi-azure-demo'; Subject = 'repo:TrezzeCloud/TrezzeCloud.CatalogAPI:environment:azure-demo' }
+    @{ Name = 'usersapi-azure-demo'; Subject = 'repo:TrezzeCloud@321194422/TrezzeCloud.UsersAPI@1243857293:environment:azure-demo' },
+    @{ Name = 'catalogapi-azure-demo'; Subject = 'repo:TrezzeCloud@321194422/TrezzeCloud.CatalogAPI@1244703727:environment:azure-demo' }
 )
 
 foreach ($repo in $repos) {
     $existing = $existingCredentials | Where-Object { $_.name -eq $repo.Name } | Select-Object -First 1
     if ($existing) {
         if ($existing.subject -ne $repo.Subject) {
-            throw "A credencial federada $($repo.Name) ja existe com outro subject."
+            az identity federated-credential update --resource-group $ResourceGroup --identity-name $IdentityName --name $repo.Name --issuer 'https://token.actions.githubusercontent.com' --subject $repo.Subject --audiences 'api://AzureADTokenExchange' -o none
+            if ($LASTEXITCODE -ne 0) {
+                throw "Falha ao atualizar federacao $($repo.Name)."
+            }
+            Write-Host "Federacao atualizada: $($repo.Name)"
         }
-        Write-Host "Federacao ja existente: $($repo.Name)"
+        else {
+            Write-Host "Federacao ja existente: $($repo.Name)"
+        }
         continue
     }
 
