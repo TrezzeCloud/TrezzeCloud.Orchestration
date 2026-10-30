@@ -1,0 +1,44 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: fcg-apis
+  namespace: fcg-fase4
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+    traefik.ingress.kubernetes.io/router.tls: "true"
+spec:
+  ingressClassName: fcg-traefik
+  # Sem Secret, Traefik usa certificado gerado nao confiavel (somente teste interno).
+  tls:
+    - {}
+  rules:
+    - http:
+        paths:
+          - path: /api/users
+            pathType: Prefix
+            backend:
+              service:
+                name: users-api
+                port:
+                  number: 8080
+          - path: /api/games
+            pathType: Prefix
+            backend:
+              service:
+                name: catalog-api
+                port:
+                  number: 8080
+          - path: /api/store
+            pathType: Prefix
+            backend:
+              service:
+                name: catalog-api
+                port:
+                  number: 8080
+          - path: /search
+            pathType: Prefix
+            backend:
+              service:
+                name: catalog-api
+                port:
+                  number: 8080
