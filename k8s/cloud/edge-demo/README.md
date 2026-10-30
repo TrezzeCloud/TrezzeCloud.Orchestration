@@ -91,4 +91,11 @@ kubectl -n fcg-ingress logs deployment/fcg-traefik --tail=50
 
 No modo externo, capture também `kubectl -n fcg-ingress get svc fcg-traefik` e uma resposta HTTP da API usando a URL de entrada. Não versionar segredos, prints com tokens ou IPs vinculados a contas de colegas.
 
-**Status:** manifests e scripts preparados e validados por CI. O acesso externo ainda precisa de teste real em AKS antes de ser declarado concluído.
+**Validação interna concluída em 30/10/2026 (AKS Canada Central, assinatura de teste):**
+- `helm upgrade --install` finalizou com `STATUS: deployed` e chart `42.1.3`, usando Traefik `v3.7.16`.
+- Deployment `fcg-traefik` e pod ficaram `1/1 Ready`, `Running`, sem restarts.
+- Service `fcg-traefik` ficou `ClusterIP` (`443/TCP`), **sem IP público**.
+- Ingress `fcg-apis` criado com classe `fcg-traefik`.
+- Por `port-forward` HTTPS único: `GET /api/games` retornou **HTTP 200** e `GET /api/users`, sem token JWT, retornou **HTTP 401**.
+
+Esses resultados comprovam roteamento interno e autorização da rota protegida, mas **não comprovam acesso externo**. O Service `LoadBalancer` público permanece pendente de teste controlado e de validação da remoção após o uso.
