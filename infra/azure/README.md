@@ -23,12 +23,12 @@ az account list -o table
 az bicep build --file infra/azure/main.bicep
 ```
 
-Antes de provisionar, verificar a disponibilidade da VM escolhida, a quota da assinatura e os preços na região. O SKU padrão é `Standard_D4as_v5`; pode ser necessário alterá-lo.
+Antes de provisionar, verificar a disponibilidade da VM escolhida, a quota da assinatura e os preços na região. O SKU deve ser informado explicitamente. Uma configuracao de um unico no e apenas tentativa para demonstracao: a API do AKS pode recusar a contagem de nos ou o SKU, mesmo que a VM esteja na lista.
 
 Na raiz do repositório:
 
 ```powershell
-./infra/azure/deploy.ps1 -MemberId fase4teste -SubscriptionId "<subscription-id>" -Location brazilsouth
+./infra/azure/deploy.ps1 -MemberId fase4teste -SubscriptionId "<subscription-id>" -Location brazilsouth -VmSize "<sku-confirmado>"
 ```
 
 O script mostra o plano de implantação e pede confirmação antes de criar o AKS e o ACR.
@@ -62,4 +62,4 @@ O AKS Free não inclui gratuitamente as VMs, discos, rede ou o ACR. A infraestru
 
 Créditos Azure for Students não cobrem ofertas do Azure Marketplace. Isso precisa ser considerado na escolha do serviço gerenciado de Elasticsearch. O RabbitMQ Trigger das Azure Functions exige um plano de hospedagem compatível e também pode representar custo significativo.
 
-**Status:** templates criados, ainda sem validação de compilação e sem implantação em uma assinatura real.
+**Status:** build e lint realizados localmente; a configuracao de um no e experimental e ainda precisa de validacao na API Azure. Nenhum recurso foi implantado.
