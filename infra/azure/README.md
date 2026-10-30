@@ -1,32 +1,65 @@
-# Fase 4: Azure temporario por integrante
+# Infraestrutura Azure — Fase 4
 
-Este primeiro pacote provisiona SOMENTE AKS Free tier (controle) e ACR Basic. O deploy completo, segredos, persistencia, Elasticsearch, Datadog e Functions virão nas etapas seguintes.
+Os templates desta pasta criam um AKS e um Azure Container Registry (ACR). O ambiente é temporário e será usado para validar a publicação da FCG na nuvem.
 
-## Limite US$ 100
-AKS Free nao isenta cobrancas por nos VM, discos, rede, IP, registry e servicos externos. Consulte calculadora oficial Azure e Cost Management antes de provisionar. Nao deixe o ambiente ligado entre testes.
+O código da infraestrutura não depende de uma assinatura específica. A assinatura é informada na execução dos scripts; nenhuma credencial é armazenada no repositório.
 
-## Passo a passo individual
-1. Instale Azure CLI, PowerShell, kubectl e tenha quota/permissoes na assinatura Azure.
-2. No repositorio Orchestration execute: az login
-3. Confira: az account list -o table
-4. Verifique Bicep: az bicep build --file infra/azure/main.bicep
-5. Confira na calculadora Azure o custo da regiao e SKU escolhidos.
-6. Provisionar (na raiz): ./infra/azure/deploy.ps1 -MemberId membro01 -SubscriptionId '<sua-subscription-id>' -Location brazilsouth
-7. Confira what-if, custos, as duas confirmacoes do script e os recursos no Portal.
-8. Listar: az resource list -g rg-fcg-fase4-membro01 -o table
-9. Confira AKS e ACR: az aks list -g rg-fcg-fase4-membro01 -o table ; az acr list -g rg-fcg-fase4-membro01 -o table
-10. Vincule ACR (exige RBAC): az aks update -g <rg> -n <aks> --attach-acr <acr>
-11. Acesse cluster: az aks get-credentials -g <rg> -n <aks> ; kubectl get nodes
-12. Depois da gravacao: ./infra/azure/destroy.ps1 -MemberId membro01 -SubscriptionId '<sua-subscription-id>'
-13. Verifique no portal a conclusao da exclusao. Recursos fora desse RG exigem limpeza adicional.
+## Escopo atual
 
-## Regras de seguranca
-Nao comitar subscriptions, credenciais, tokens, connection strings ou secrets. Cada integrante tem Resource Group e acesso Azure propios. Os scripts exigem confirmacao de criacao e de exclusao. A exclusao e irreversivel. Uma replica/no nao prova alta disponibilidade. Azure Functions com RabbitMQTrigger exige plano compativel, rede e custo adicionais.
+- AKS com plano de gerenciamento Free e um node pool inicial.
+- ACR Basic sem usuário administrador.
+- Scripts PowerShell para criar e excluir o Resource Group.
+- Workflow para compilar os arquivos Bicep.
 
-## Estado
-- [x] AKS + ACR em Bicep com parametros por integrante
-- [x] Criacao e exclusao por PowerShell com confirmacao
-- [x] Workflow estatico de build do Bicep sem custos Azure
-- [ ] Execucao do workflow e validacao real em Azure
-- [ ] Pipeline de deploy e configuracao OIDC por integrante
-- [ ] Recursos adicionais, gateway, Elasticsearch, Functions e demonstracao de ponta a ponta
+A implantação dos microsserviços, bancos, Gateway, busca e Azure Functions será adicionada nas próximas etapas.
+
+## Validação inicial
+
+Pré-requisitos: Azure CLI, PowerShell, kubectl e uma assinatura com permissões e quota suficientes.
+
+```powershell
+az login
+az account list -o table
+az bicep build --file infra/azure/main.bicep
+```
+
+Antes de provisionar, verificar a disponibilidade da VM escolhida, a quota da assinatura e os preços na região. O SKU padrão é `Standard_D4as_v5`; pode ser necessário alterá-lo.
+
+Na raiz do repositório:
+
+```powershell
+./infra/azure/deploy.ps1 -MemberId fase4teste -SubscriptionId "<subscription-id>" -Location brazilsouth
+```
+
+O script mostra o plano de implantação e pede confirmação antes de criar o AKS e o ACR.
+
+Depois de provisionar:
+
+```powershell
+$rg = "rg-fcg-fase4-fase4teste"
+az resource list -g $rg -o table
+az aks list -g $rg -o table
+az acr list -g $rg -o table
+```
+
+A configuração de acesso do AKS ao ACR e a publicação dos serviços serão incluídas na próxima etapa.
+
+## Remoção
+
+Ao terminar o teste:
+
+```powershell
+./infra/azure/destroy.ps1 -MemberId fase4teste -SubscriptionId "<subscription-id>"
+```
+
+O script solicita a confirmação do nome do Resource Group. A exclusão remove também os dados armazenados nele. Verificar no Portal se o grupo foi completamente excluído.
+
+## Custos e limitações
+
+O grupo utiliza assinaturas Azure for Students, cada uma com seu próprio crédito de US$ 100. O desenvolvimento e os testes iniciais serão feitos em uma única assinatura. Depois da validação, será preparado um manual separado para reproduzir o ambiente nas demais contas.
+
+O AKS Free não inclui gratuitamente as VMs, discos, rede ou o ACR. A infraestrutura deve permanecer ativa somente durante os testes. Conferir o saldo e o consumo no Cost Management.
+
+Créditos Azure for Students não cobrem ofertas do Azure Marketplace. Isso precisa ser considerado na escolha do serviço gerenciado de Elasticsearch. O RabbitMQ Trigger das Azure Functions exige um plano de hospedagem compatível e também pode representar custo significativo.
+
+**Status:** templates criados, ainda sem validação de compilação e sem implantação em uma assinatura real.
