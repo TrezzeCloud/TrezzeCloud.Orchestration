@@ -1,0 +1,22 @@
+name: Fase 4 - validar Bicep
+on:
+  workflow_dispatch:
+  push:
+    branches: [feature/fase4-infra]
+    paths: ['infra/azure/**', '.github/workflows/fase4-infra-validate.yml']
+  pull_request:
+    branches: [main]
+    paths: ['infra/azure/**', '.github/workflows/fase4-infra-validate.yml']
+permissions:
+  contents: read
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build Bicep sem provisionar recursos
+        uses: azure/cli@v2
+        with:
+          inlineScript: |
+            az bicep build --file infra/azure/main.bicep --outfile /tmp/fcg-infra.json
+            test -s /tmp/fcg-infra.json
