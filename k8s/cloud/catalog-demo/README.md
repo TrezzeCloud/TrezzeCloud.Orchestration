@@ -87,7 +87,9 @@ kubectl -n fcg-fase4 port-forward svc/catalog-api 8081:8080
 .\infra\azure\test-catalog-integrated.ps1
 ```
 
-O script lê a senha do administrador a partir do Kubernetes Secret apenas em memória, obtém JWT na UsersAPI, cadastra/atualiza um jogo, verifica a invalidação do cache Redis, cadastra um usuário comum e grava/lê uma avaliação no MongoDB. Não imprime credenciais. Deixa um jogo, uma avaliação e um usuário de teste para conferência posterior. Precisa de permissão para consultar Secrets no namespace.
+O teste integrado foi executado com sucesso no AKS em 30/10/2026. Foi confirmado login do administrador na UsersAPI, cadastro e atualização de jogo no SQL Server, invalidação do Redis após ambas as operações (TTL=-2), reconstrução do cache, cadastro de usuário, JWT compartilhado e criação/leitura de avaliação no MongoDB (POST HTTP 201, PUT do jogo HTTP 204). O jogo criado no teste tem ID `e2947927-7b95-4946-8b39-dedc1d9a2270`.
+
+O script lê a senha do administrador a partir do Kubernetes Secret apenas em memória, não imprime credenciais e mantém um jogo, uma avaliação e um usuário de teste para conferência posterior. Requer permissão para consultar Secrets no namespace.
 
 ## Cuidados
 
