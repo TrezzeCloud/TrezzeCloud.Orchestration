@@ -64,6 +64,12 @@ O grupo utiliza assinaturas Azure for Students, cada uma com seu próprio crédi
 
 O AKS Free não inclui gratuitamente as VMs, discos, rede ou o ACR. A infraestrutura deve permanecer ativa somente durante os testes. Conferir o saldo e o consumo no Cost Management.
 
+## Publicação de imagens
+
+O build remoto com `az acr build` foi bloqueado pela assinatura estudantil (`TasksOperationsNotAllowed`). Para publicar imagens no ACR, executar o Docker localmente e enviar com `docker push`, sem depender de ACR Tasks.
+
+A UsersAPI possui `scripts/publish-acr.ps1` na branch `feature/fase4-ci`. O script autentica com `az acr login`, gera uma tag baseada no commit Git e publica no registry. A automação por GitHub Actions também deverá construir a imagem no runner, sem chamar `az acr build`.
+
 Créditos Azure for Students não cobrem ofertas do Azure Marketplace. Isso precisa ser considerado na escolha do serviço gerenciado de Elasticsearch. O RabbitMQ Trigger das Azure Functions exige um plano de hospedagem compatível e também pode representar custo significativo.
 
 **Status:** AKS + ACR provisionados com sucesso em Canada Central. Kubernetes v1.36.5, nó `Ready` e pods de sistema `Running`. Associação e validação de acesso AKS–ACR concluídas no Cloud Shell; publicação das imagens e implantação dos serviços pendentes.
