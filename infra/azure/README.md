@@ -1,10 +1,11 @@
 # Infraestrutura Azure — Fase 4
 
-## Comece aqui se voce vai gravar a entrega
+## Referencias tecnicas versionadas
 
-1. [Guia do integrante: ambiente completamente independente](GUIA-INTEGRANTE-DO-ZERO.md).
-2. [Roteiro de gravacao do video final](ROTEIRO-VIDEO-FASE4.md).
-3. [Auditoria dos requisitos da Fase 4](AUDITORIA-REQUISITOS-FASE4.md).
+- [Guia de reproducao tecnica e validacao](GUIA-REPRODUCAO-E-VALIDACAO.md).
+- [Auditoria dos requisitos da Fase 4](AUDITORIA-REQUISITOS-FASE4.md).
+
+O passo a passo de operacao do apresentador (criacao de contas, instalacao de ferramentas e roteiro de video) e distribuido fora do repositorio; os scripts e instrucoes tecnicas para reproducao continuam aqui.
 
 
 Os templates desta pasta criam um AKS e um Azure Container Registry (ACR). O ambiente é temporário e será usado para validar a publicação da FCG na nuvem.
