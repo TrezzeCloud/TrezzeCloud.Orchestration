@@ -177,7 +177,7 @@ kubectl -n fcg-fase4 rollout status deployment/catalog-api
 kubectl -n fcg-fase4 get deployment users-api catalog-api -o wide
 ~~~
 
-O CI/CD ja foi aprovado na conta de referencia, mas o **teste com forks/contas independentes e um requisito de homologacao separado**. Nao confunda o teste manual via publish-acr.ps1 com o live deploy do pipeline.
+**CI/CD comprovado na conta de referencia em 30/10/2026:** a CatalogAPI passou tanto no [push para main #41140430463](https://github.com/TrezzeCloud/TrezzeCloud.CatalogAPI/actions/runs/41140430463) quanto no [Run workflow manual #41140622341](https://github.com/TrezzeCloud/TrezzeCloud.CatalogAPI/actions/runs/41140622341), com `validate`, `search_integration` e `publish_deploy` aprovados. O **teste com forks/contas independentes e um requisito de homologacao separado**. Nao confunda o teste manual via `publish-acr.ps1` com o live deploy do pipeline; para o video, use um commit real no fork do apresentador.
 
 ## Evidencias da assinatura de referencia (30/10/2026)
 
