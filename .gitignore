@@ -431,3 +431,6 @@ FodyWeavers.xsd
 .env
 k8s/jwt.env
 .validation/
+
+# Bicep gerado localmente
+infra/azure/main.json
