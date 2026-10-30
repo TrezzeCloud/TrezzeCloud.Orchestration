@@ -11,7 +11,7 @@ O código da infraestrutura não depende de uma assinatura específica. A assina
 - Scripts PowerShell para criar e excluir o Resource Group.
 - Workflow para compilar os arquivos Bicep.
 
-A UsersAPI já foi validada no AKS com SQL Server e RabbitMQ. CatalogAPI, MongoDB e Redis foram implantados em `fcg-fase4`, com os três pods `Ready` e PVC do MongoDB `Bound`. Foram concluídos testes funcionais de leitura, cadastro e atualização, incluindo SQL Server, Redis, MongoDB e autenticação JWT compartilhada. Gateway, busca gerenciada, Azure Functions e pipelines completos ainda serão adicionados.
+A UsersAPI já foi validada no AKS com SQL Server e RabbitMQ. CatalogAPI, MongoDB e Redis foram implantados em `fcg-fase4`, com os três pods `Ready` e PVC do MongoDB `Bound`. Foram concluídos testes funcionais de leitura, cadastro e atualização, incluindo SQL Server, Redis, MongoDB e autenticação JWT compartilhada. Pipelines completos de UsersAPI e CatalogAPI foram validados. A busca Elasticsearch está implementada em uma feature da CatalogAPI e aguarda teste com serviço gerenciado. O ingress HTTPS está preparado para a próxima validação, e Azure Functions ainda será revisado conforme o escopo da fase.
 
 A assinatura usada nos testes permite apenas eastus2, southcentralus, chilecentral, canadacentral e mexicocentral. A validação e o provisionamento de AKS com um nó Standard_D4_v4 e ACR Basic foram concluídos em Canada Central nesta assinatura. O nó ficou `Ready` e os pods de sistema estavam `Running`. Esse resultado não garante a mesma configuração em outras assinaturas. A região continua sendo um parâmetro, pois outras assinaturas podem ter políticas diferentes.
 
@@ -50,9 +50,15 @@ O AKS foi acessado com `az aks get-credentials`. O nó de sistema foi verificado
 
 ## CI/CD
 
-Os pipelines estão nas branches `feature/fase4-ci` dos repositórios UsersAPI e CatalogAPI. O CI executa testes e build Docker sem acesso ao Azure. A publicação no ACR e o rollout no AKS estão configurados para `main`, com autenticação OIDC e o ambiente GitHub `azure-demo`.
+Os pipelines CI/CD estão integrados à `main` dos repositórios UsersAPI e CatalogAPI. O CI executa testes e build Docker sem acesso ao Azure; o deploy automático via OIDC, ACR e rolling update no AKS foi validado em ambos os serviços.
 
-Para configurar a identidade gerenciada, as credenciais federadas e as variáveis de cada assinatura, consulte `infra/azure/github-actions.md` e `infra/azure/setup-github-oidc.ps1`. Esses recursos ainda não foram provisionados na assinatura de testes; o AKS permanece parado.
+Para configurar a identidade gerenciada, as credenciais federadas e as variáveis de cada assinatura, consulte `infra/azure/github-actions.md` e `infra/azure/setup-github-oidc.ps1`. Esses recursos foram provisionados e os dois deployments automáticos validados na assinatura de testes. O estado atual do AKS deve ser verificado com `az aks show` antes de qualquer operação.
+
+## Exposição externa por Ingress Controller
+
+A entrada HTTP(S) foi preparada com Traefik Proxy e chart Helm 42.1.3, sem depender do projeto ingress-nginx (encerrado em 2026). Por segurança e economia, o modo padrão é **interno** (`ClusterIP`, sem IP público). Para demonstrar o requisito obrigatório de acesso externo, o instalador pode configurar **um único** Service `LoadBalancer` com HTTPS e confirmação explícita. UsersAPI e CatalogAPI permanecem internos. Nenhum recurso público foi criado por esta atualização.
+
+Consulte [k8s/cloud/edge-demo/README.md](../../k8s/cloud/edge-demo/README.md). Scripts: `infra/azure/deploy-edge-demo.ps1` e `infra/azure/destroy-edge-demo.ps1`. Antes da exposição pública, configure TLS confiável e avalie custos de IP público e Load Balancer.
 
 ## Remoção
 
@@ -74,8 +80,8 @@ O AKS Free não inclui gratuitamente as VMs, discos, rede ou o ACR. A infraestru
 
 O build remoto com `az acr build` foi bloqueado pela assinatura estudantil (`TasksOperationsNotAllowed`). Para publicar imagens no ACR, executar o Docker localmente e enviar com `docker push`, sem depender de ACR Tasks.
 
-A UsersAPI possui `scripts/publish-acr.ps1` na branch `feature/fase4-ci`. O script autentica com `az acr login`, gera uma tag baseada no commit Git e publica no registry. A automação por GitHub Actions também deverá construir a imagem no runner, sem chamar `az acr build`.
+A UsersAPI possui `scripts/publish-acr.ps1` na branch `main`. O script autentica com `az acr login`, gera uma tag baseada no commit Git e publica no registry. A automação por GitHub Actions já constrói e publica a imagem no runner, sem chamar `az acr build`.
 
 Créditos Azure for Students não cobrem ofertas do Azure Marketplace. Isso precisa ser considerado na escolha do serviço gerenciado de Elasticsearch. O RabbitMQ Trigger das Azure Functions exige um plano de hospedagem compatível e também pode representar custo significativo.
 
-**Status:** AKS, ACR, UsersAPI, SQL Server e RabbitMQ funcionando. Swagger HTTP 200, acesso sem autenticação HTTP 401 e testes de cadastro, login e permissão concluídos (401/403). CatalogAPI, MongoDB e Redis implantados; testes integrados de leitura, cadastro/atualização, JWT entre APIs, avaliação em MongoDB e invalidação do Redis aprovados em 30/10/2026. Os demais requisitos da Fase 4 continuam pendentes.
+**Status:** AKS, ACR, UsersAPI, SQL Server e RabbitMQ funcionando. Swagger HTTP 200, acesso sem autenticação HTTP 401 e testes de cadastro, login e permissão concluídos (401/403). CatalogAPI, MongoDB e Redis implantados; testes integrados de leitura, cadastro/atualização, JWT entre APIs, avaliação em MongoDB e invalidação do Redis aprovados em 30/10/2026. A exposição externa e a integração Elasticsearch com serviço gerenciado ainda dependem de validação, apesar da infraestrutura e do código já preparados.
