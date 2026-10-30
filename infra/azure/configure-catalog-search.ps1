@@ -39,7 +39,7 @@ try {
         type = 'Opaque'
         metadata = @{ name = 'catalog-search-secrets'; namespace = $namespace }
         data = @{
-            'Elasticsearch__Endpoint' = To-Base64 $Endpoint.TrimEnd('/')
+            'Elasticsearch__Endpoint' = To-Base64 ($Endpoint.TrimEnd('/'))
             'Elasticsearch__ApiKey' = To-Base64 $apiKey
         }
     }
