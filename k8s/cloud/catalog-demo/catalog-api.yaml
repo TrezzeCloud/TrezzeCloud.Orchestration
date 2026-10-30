@@ -62,6 +62,20 @@ spec:
                 secretKeyRef:
                   name: catalog-demo-secrets
                   key: Redis__ConnectionString
+            - name: Elasticsearch__Endpoint
+              valueFrom:
+                secretKeyRef:
+                  name: catalog-search-secrets
+                  key: Elasticsearch__Endpoint
+                  optional: true
+            - name: Elasticsearch__ApiKey
+              valueFrom:
+                secretKeyRef:
+                  name: catalog-search-secrets
+                  key: Elasticsearch__ApiKey
+                  optional: true
+            - name: Elasticsearch__IndexName
+              value: fcg-games
           resources:
             requests:
               cpu: 120m
