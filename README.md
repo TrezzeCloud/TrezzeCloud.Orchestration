@@ -1,4 +1,28 @@
-# TrezzeCloud.Orchestration — Fase 3
+# TrezzeCloud.Orchestration — Fases 3 e 4
+
+## Documentacao tecnica da Fase 4
+
+- [**Auditoria de atendimento aos requisitos com evidencias e pendencias**](infra/azure/AUDITORIA-REQUISITOS-FASE4.md).
+- [**Referencia tecnica de provisionamento e validacao**](infra/azure/GUIA-REPRODUCAO-E-VALIDACAO.md).
+
+O **tutorial operacional do integrante e o roteiro de gravacao** sao fornecidos separadamente ao apresentador, fora do repositorio. A infraestrutura, os scripts, as configuracoes necessarias e as instrucoes tecnicas permanecem versionados no GitHub. Cada integrante deve usar sua propria assinatura Azure, forks GitHub, identidade OIDC e Elastic Cloud.
+
+## Fase 4 — implantacao gerenciada no Azure
+
+A infraestrutura da Fase 4 utiliza **AKS, Azure Container Registry (ACR), GitHub Actions com OIDC e rolling update**, com SQL Server, RabbitMQ, UsersAPI, CatalogAPI, MongoDB e Redis no cluster. A busca avançada da CatalogAPI utiliza **Elastic Cloud Serverless**, externo ao Resource Group do AKS. O fluxo original da Fase 3 e seus manifests locais continuam documentados abaixo.
+
+**Validacao na assinatura de referencia em 30/10/2026:** seis Deployments 1/1 Ready, PVCs SQL/Mongo Bound e Secret de busca presente. `test-search-integrated.ps1` confirmou reindexacao de **12 jogos**, Fuzzy Search, criacao, atualizacao e desativacao no Elasticsearch gerenciado; `validate-cloud-fase4.ps1 -RequireElasticSecret` aprovou a estrutura do AKS. O Traefik atualmente opera em modo privado (`ClusterIP`), apos um teste externo anterior.
+
+**Documentacao e scripts da Fase 4:**
+- [Guia de reproducao e validacao no Azure](infra/azure/GUIA-REPRODUCAO-E-VALIDACAO.md).
+- [Infraestrutura e cuidados com custos](infra/azure/README.md).
+- [CI/CD com GitHub Actions e OIDC](infra/azure/github-actions.md).
+- Scripts `infra/azure/configure-catalog-search.ps1`, `infra/azure/test-search-integrated.ps1` e `infra/azure/validate-cloud-fase4.ps1`.
+
+**Ainda a demonstrar:** live deploy para o video final, nova exposicao HTTPS publica apenas durante a demonstracao e reproducao independente em uma assinatura/fork de outro integrante. Nao compartilhe Secrets nem confunda um teste da assinatura de referencia com homologacao em todas as assinaturas.
+
+---
+
 
 Execução local com Docker Compose e manifests Kubernetes para Kong, UsersAPI, CatalogAPI, PaymentsAPI, SQL Server, RabbitMQ, MongoDB e Redis. Notificações usam Azure Functions: no Compose, o host isolated roda em container com Azurite; para Kubernetes, a estratégia é implantar a Function no Azure, fora do cluster. A opção de observabilidade escolhida para a Fase 3 é o Datadog.
 
