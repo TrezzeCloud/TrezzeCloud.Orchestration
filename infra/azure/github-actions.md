@@ -62,6 +62,17 @@ repo:TrezzeCloud@321194422/TrezzeCloud.CatalogAPI@1244703727:environment:azure-d
 
 Em cada nova assinatura estudantil, execute a configuração na conta correspondente e substitua os segredos e as variáveis do ambiente `azure-demo`. Isso evita editar os workflows ou inserir credenciais nos commits.
 
+## Primeira publicação automatizada validada
+
+Em 30/10/2026, a UsersAPI concluiu a primeira execução automática após corrigir o subject OIDC:
+- Pipeline GitHub Actions [run #41111414981](https://github.com/TrezzeCloud/TrezzeCloud.UsersAPI/actions/runs/41111414981), tentativa 2: `success`.
+- CI de validação aprovado (`.NET 10` e Docker).
+- `azure/login` autenticou via OIDC com a identidade gerenciada.
+- Imagem `trezzecloud-users-api:12284933a78352ec3bad08e30dbab3676b8ace7b` enviada ao ACR.
+- `kubectl set image` executado e `deployment/users-api` apresentou `successfully rolled out`, com 1/1 Ready.
+
+O deploy da CatalogAPI ainda não foi validado. Não confundir o sucesso do CI da CatalogAPI com o primeiro deploy dela na `main`.
+
 ## 3. Preparação para a primeira publicação automática
 
 Antes de integrar os PRs à `main`:
