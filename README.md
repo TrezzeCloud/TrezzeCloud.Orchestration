@@ -1,5 +1,13 @@
 # TrezzeCloud.Orchestration — Fases 3 e 4
 
+## Guias para o integrante que gravara a Fase 4
+
+- [**Passo a passo completo: do portal Azure ao seu proprio cluster, testes e Secrets**](infra/azure/GUIA-INTEGRANTE-DO-ZERO.md).
+- [**Roteiro do video final (ate 25 minutos)**](infra/azure/ROTEIRO-VIDEO-FASE4.md).
+- [**Auditoria do enunciado com evidencias e pendencias**](infra/azure/AUDITORIA-REQUISITOS-FASE4.md).
+
+Os guias assumem **assinatura Azure, forks GitHub, credenciais OIDC e Elastic Cloud independentes por integrante**. O material foi conferido contra os scripts, mas a reproducao ponta a ponta fora da assinatura de referencia precisa ser executada.
+
 ## Fase 4 — implantacao gerenciada no Azure
 
 A infraestrutura da Fase 4 utiliza **AKS, Azure Container Registry (ACR), GitHub Actions com OIDC e rolling update**, com SQL Server, RabbitMQ, UsersAPI, CatalogAPI, MongoDB e Redis no cluster. A busca avançada da CatalogAPI utiliza **Elastic Cloud Serverless**, externo ao Resource Group do AKS. O fluxo original da Fase 3 e seus manifests locais continuam documentados abaixo.
