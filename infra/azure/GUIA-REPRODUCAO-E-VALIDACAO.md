@@ -1,5 +1,8 @@
 # Fase 4 - Reproducao do zero, validacao final e desmobilizacao
 
+**Para o apresentador que parte de uma maquina sem ferramentas instaladas, utilize primeiro o [guia integral independente](GUIA-INTEGRANTE-DO-ZERO.md).** Depois, siga o [roteiro de video](ROTEIRO-VIDEO-FASE4.md) e a [auditoria dos requisitos](AUDITORIA-REQUISITOS-FASE4.md). Este arquivo permanece como referencia tecnica adicional de infraestrutura e desmobilizacao.
+
+
 Este guia e a referencia operacional para **cada integrante montar seu proprio ambiente**, testar e remover seus recursos. Foi escrito para PowerShell em Windows e para uma conta Azure com cota/permissao adequadas. O projeto usa AKS, ACR, SQL Server, RabbitMQ, UsersAPI, CatalogAPI, MongoDB, Redis, Traefik e Elasticsearch gerenciado externo.
 
 **Importante:** uma execucao completa em outra assinatura ainda precisa ser comprovada. Os comandos aqui documentados foram reunidos a partir das implantacoes anteriores. Nao trate uma conta ou uma regiao como universalmente compativel: SKU, cota, IAM e planos podem variar. Nao exponha credenciais, tokens nem os valores de Kubernetes Secrets nos registros da entrega.
