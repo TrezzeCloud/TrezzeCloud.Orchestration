@@ -49,6 +49,10 @@
 9. Os quatro microsservicos da Fase 2 existem em repositorios, mas os manifests cloud desta Fase 4 sob analise executam duas APIs e quatro dependencias. Nao atribuir ao ambiente cloud um fluxo de pagamento/notificacoes que nao foi demostrado nele.
 10. Azure for Students e Elastic Cloud estao sujeitos a politicas/quotas/precos proprios. Cada apresentador deve usar apenas sua propria assinatura e chaves.
 
+## Correcao identificada no CI da CatalogAPI
+
+**Ponto tecnico encontrado nesta auditoria:** a job publish_deploy depende de search_integration; entretanto, a configuracao da main antes da correcao nao executa search_integration em workflow_dispatch. A publicacao manual pelo botao Run workflow seria ignorada por dependencia skipped. Um PR de ajuste do workflow foi aberto: https://github.com/TrezzeCloud/TrezzeCloud.CatalogAPI/pull/6. Ele tambem inclui testes de integracao para todos os PRs contra main. **A correcao ainda nao foi integrada a main nem validada por CI na presente auditoria.** O fluxo push na main ja executava a integracao.
+
 ## Trabalho necessario antes de considerar a entrega final encerrada
 
 - [ ] Integrar os PRs documentais aprovados a main e conferir links internos dos README.
