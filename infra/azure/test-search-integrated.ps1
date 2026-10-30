@@ -39,7 +39,7 @@ function Call-Api {
         throw "$Method $Uri falhou (HTTP $httpStatus). Verifique se Elasticsearch gerenciado e API estao acessiveis. $($_.Exception.Message)"
     }
     if ([int]$response.StatusCode -ne $Status) {
-        throw "$Method $Uri: esperado HTTP $Status; recebido HTTP $($response.StatusCode)"
+        throw "$Method ${Uri}: esperado HTTP $Status; recebido HTTP $($response.StatusCode)"
     }
     if ([string]::IsNullOrWhiteSpace($response.Content)) { return $null }
     return ConvertFrom-Json -InputObject $response.Content
