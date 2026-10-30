@@ -37,7 +37,17 @@ Com o port-forward ativo em outro terminal, verifique `http://localhost:8080/swa
 
 A primeira execução de `deploy-users-demo.ps1` concluiu o rollout. UsersAPI, SQL Server e RabbitMQ estavam `Running` e `Ready` (1/1), sem reinicializações. O PVC `sqlserver-data` de 10 GiB ficou `Bound`. Todos os serviços ficaram internos como `ClusterIP`.
 
-Ainda falta confirmar os endpoints da UsersAPI por `port-forward` e realizar testes de autenticação.
+O Swagger respondeu HTTP 200 e a rota GET `/api/users` retornou HTTP 401 sem token. A inicialização registrou consultas ao SQL Server e o barramento MassTransit conectado ao RabbitMQ.
+
+Para validar cadastro, persistência, JWT e autorização com credenciais descartáveis, mantenha o port-forward ativo e execute, na raiz da Orchestration:
+
+```powershell
+.\infra\azure\test-users-demo.ps1
+```
+
+O teste cria uma conta com e-mail aleatório, executa cadastro e login e confirma que um usuário comum não tem acesso à rota de administrador. Não imprime tokens nem senhas. O evento `UserCreatedEvent` é publicado pelo endpoint de cadastro, mas sua entrega ao consumidor ainda precisa de verificação específica.
+
+Ainda falta validar o fluxo completo com o script e conferir eventuais erros nos logs.
 
 ## Observações
 
