@@ -98,4 +98,9 @@ No modo externo, capture também `kubectl -n fcg-ingress get svc fcg-traefik` e 
 - Ingress `fcg-apis` criado com classe `fcg-traefik`.
 - Por `port-forward` HTTPS único: `GET /api/games` retornou **HTTP 200** e `GET /api/users`, sem token JWT, retornou **HTTP 401**.
 
-Esses resultados comprovam roteamento interno e autorização da rota protegida, mas **não comprovam acesso externo**. O Service `LoadBalancer` público permanece pendente de teste controlado e de validação da remoção após o uso.
+**Validação externa concluída em 30/10/2026 (AKS Canada Central, assinatura de teste):**
+- Execução `deploy-edge-demo.ps1 -Exposure Public -AllowSelfSignedDemo`, com confirmação `PUBLICAR`: Helm release `fcg-edge` atualizado para revisão 2 (`deployed`), deployment `fcg-traefik` 1/1 Ready.
+- Service `fcg-traefik` passou a `LoadBalancer`, recebeu IP público `4.248.245.117`, porta `443/TCP`.
+- Testes HTTPS feitos **fora do port-forward**, diretamente no IP público, com `curl.exe -k --max-time 15`: `GET /api/games` → **HTTP 200**; `GET /api/users` sem JWT → **HTTP 401**.
+- Conclusão: acesso externo via **um único Load Balancer + Ingress Traefik**, incluindo o roteamento para as duas APIs, validado. Não se trata de configuração TLS de produção; `-k` foi utilizado apenas para teste com certificado autossinado.
+- **Pendente evidência de desativação:** após o teste, executar `deploy-edge-demo.ps1 -Exposure Internal`, confirmar Service como `ClusterIP` / `EXTERNAL-IP <none>` e verificar no Portal Azure a liberação do recurso de IP público. Evitar deixar Load Balancer e IP público cobrando fora dos testes.
