@@ -23,7 +23,7 @@
 | Deploy automatico e rolling update sem downtime esperado | workflow publish_deploy, kubectl set image, rollout status/undo | **VALIDADO anteriormente** na referencia. **PENDENTE** cena nova live deploy | Push em main, workflow, rollout e resposta com novo header |
 | Segredos sem hardcode em codigo/YAML de implantacao | users-demo-secrets/catalog-demo-secrets gerados por scripts; secretKeyRef nos manifests cloud; catalog-search-secrets | **VALIDADO estruturalmente:** Secrets presentes, valores nao expostos; scripts de scan de appsettings em ambas APIs | YAML sem password literal, Secret metadata, OIDC; ocultar valores |
 | Cloud Native e portabilidade documental | Bicep e scripts parametrizados por SubscriptionId, MemberId, Location, VmSize; manifests Kubernetes | **IMPLEMENTADO:** nenhuma assinatura hardcoded nos scripts de provisionamento. **PENDENTE** reproduzir ponta a ponta na conta de outro aluno | Criar sua propria conta/AKS/ACR/forks e executar testes |
-| Video pitch de ate 25 min | ROTEIRO-VIDEO-FASE4.md | **PENDENTE de gravacao** | Todas as cenas com evidencias |
+| Video pitch de ate 25 min | Roteiro do apresentador entregue fora do GitHub | **PENDENTE de gravacao** | Todas as cenas com evidencias |
 | YAML infraestrutura, definicoes de pipeline, codigo de NoSQL e Cache | infra/azure, k8s/cloud, .github/workflows e projetos CatalogAPI/UsersAPI | **IMPLEMENTADO** nos repositorios | Links navegaveis e arquivos em GitHub |
 | Relatorio com grupo e Discord, docs, repositorios, link do video | Arquivo de entrega a preparar pelo apresentador | **PENDENTE** | Relatorio submetido conforme enunciado |
 
@@ -56,7 +56,7 @@
 ## Trabalho necessario antes de considerar a entrega final encerrada
 
 - [ ] Integrar os PRs documentais aprovados a main e conferir links internos dos README.
-- [ ] Integrante/apresentador executar o [guia do zero](GUIA-INTEGRANTE-DO-ZERO.md) com a propria assinatura, seus forks e projeto Elastic.
+- [ ] Integrante/apresentador executar o guia operacional recebido separadamente com a propria assinatura, seus forks e projeto Elastic.
 - [ ] Capturar tela de AKS/ACR, 6/6 Deployments, PVC Bound, Ingress com IP publico e respostas HTTPS.
 - [ ] Guardar outputs dos testes SQL/JWT/Redis/Mongo/Elastic no ambiente do apresentador.
 - [ ] Demonstrar **um live deploy real** da main do fork do apresentador, com code change, Actions success, nova tag ACR, rollout e resposta HTTP atualizada.
