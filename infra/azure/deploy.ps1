@@ -1,7 +1,7 @@
 param(
  [Parameter(Mandatory=$true)][ValidatePattern('^[a-z0-9]{2,12}$')][string]$MemberId,
  [Parameter(Mandatory=$true)][string]$SubscriptionId,
- [string]$Location = 'brazilsouth',
+ [string]$Location = 'eastus2',
  [Parameter(Mandatory=$true)][string]$VmSize,
  [int]$NodeCount = 1
 )
