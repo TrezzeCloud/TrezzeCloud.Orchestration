@@ -3,7 +3,9 @@ param(
     [Parameter(Mandatory = $true)][string]$ResourceGroup,
     [Parameter(Mandatory = $true)][string]$AksName,
     [Parameter(Mandatory = $true)][string]$AcrName,
-    [string]$IdentityName = 'id-fcg-fase4-actions'
+    [string]$IdentityName = 'id-fcg-fase4-actions',
+    [string]$UsersOidcSubject = 'repo:TrezzeCloud@321194422/TrezzeCloud.UsersAPI@1243857293:environment:azure-demo',
+    [string]$CatalogOidcSubject = 'repo:TrezzeCloud@321194422/TrezzeCloud.CatalogAPI@1244703727:environment:azure-demo'
 )
 
 $ErrorActionPreference = 'Stop'
@@ -62,9 +64,14 @@ $credentialsJson = az identity federated-credential list -g $ResourceGroup --ide
 if ($LASTEXITCODE -ne 0) { throw 'Falha ao listar credenciais federadas.' }
 $existingCredentials = @($credentialsJson | ConvertFrom-Json)
 
+if ($UsersOidcSubject -notmatch '^repo:.+:environment:azure-demo$' -or
+    $CatalogOidcSubject -notmatch '^repo:.+:environment:azure-demo$') {
+    throw 'Os dois subjects OIDC devem corresponder ao environment azure-demo dos respectivos repositorios.'
+}
+
 $repos = @(
-    @{ Name = 'usersapi-azure-demo'; Subject = 'repo:TrezzeCloud@321194422/TrezzeCloud.UsersAPI@1243857293:environment:azure-demo' },
-    @{ Name = 'catalogapi-azure-demo'; Subject = 'repo:TrezzeCloud@321194422/TrezzeCloud.CatalogAPI@1244703727:environment:azure-demo' }
+    @{ Name = 'usersapi-azure-demo'; Subject = $UsersOidcSubject },
+    @{ Name = 'catalogapi-azure-demo'; Subject = $CatalogOidcSubject }
 )
 
 foreach ($repo in $repos) {
@@ -124,3 +131,7 @@ Write-Host "  AKS_NAME           = $AksName"
 Write-Host "  AKS_RESOURCE_GROUP = $ResourceGroup"
 Write-Host ''
 Write-Host 'Nenhum segredo de acesso foi gerado ou gravado em arquivo. A configuracao GitHub e manual.'
+
+Write-Host ''
+Write-Host 'AVISO: a identidade so publica a partir dos repositorios cujo OIDC subject coincide com a federacao Azure.'
+Write-Host 'Em forks, use -UsersOidcSubject e -CatalogOidcSubject com os subjects emitidos pelo GitHub Actions.'

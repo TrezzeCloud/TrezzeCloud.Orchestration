@@ -1,6 +1,6 @@
 # CI/CD no Azure — Fase 4
 
-Os repositórios `TrezzeCloud.UsersAPI` e `TrezzeCloud.CatalogAPI` possuem `.github/workflows/fase4-ci-cd.yml` na branch `feature/fase4-ci`.
+Os repositórios UsersAPI e CatalogAPI possuem o workflow `.github/workflows/fase4-ci-cd.yml` na branch `main`. Cada conta Azure utiliza seu proprio environment de GitHub Actions; use forks para permitir testes verdadeiramente independentes.
 
 ## Funcionamento
 
@@ -92,7 +92,7 @@ kubectl -n fcg-fase4 rollout status deployment/users-api
 kubectl -n fcg-fase4 rollout status deployment/catalog-api
 ```
 
-O primeiro deploy com OIDC ainda precisa ser validado na assinatura estudantil. O Azure for Students pode impor restrições adicionais e a configuração IAM pode exigir permissões indisponíveis aos alunos.
+**Status atualizado:** os dois servicos foram publicados pelo GitHub Actions com OIDC e rolling update em 30/10/2026, inclusive as versoes com protecao de segredos. A CatalogAPI com Elasticsearch integrado tambem teve pipeline principal concluido com sucesso. A homologacao de forks e de assinaturas Azure diferentes nao esta comprovada por essa execucao. Consulte [GUIA-REPRODUCAO-E-VALIDACAO.md](GUIA-REPRODUCAO-E-VALIDACAO.md).
 
 ## Custo
 

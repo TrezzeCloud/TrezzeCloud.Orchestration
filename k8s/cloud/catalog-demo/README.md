@@ -12,7 +12,7 @@ Todos os serviços são internos (`ClusterIP`).
 
 ## Preparação
 
-Na branch `feature/fase4-ci` da CatalogAPI:
+Na branch `main` da CatalogAPI:
 
 ```powershell
 dotnet test TrezzeCloud.CatalogAPI.slnx -c Release
@@ -22,7 +22,7 @@ dotnet test TrezzeCloud.CatalogAPI.slnx -c Release
 
 O Azure for Students bloqueia ACR Tasks; esse script compila com Docker local e usa `docker push`. Anote a imagem completa exibida no final.
 
-Na raiz da Orchestration (`feature/fase4-infra`), com o AKS iniciado e a UsersAPI operando:
+Na raiz da Orchestration (`main`), com o AKS iniciado e a UsersAPI operando:
 
 ```powershell
 kubectl config current-context
@@ -125,4 +125,4 @@ A avaliação gratuita do Elastic Cloud é temporária; evite ativá-la antes de
 - O MongoDB possui volume persistente, sujeito a cobrança mesmo quando o AKS está parado.
 - Não apague o Secret do MongoDB mantendo seu PVC: as credenciais seriam perdidas.
 - Não exponha MongoDB, Redis ou SQL Server na internet.
-- Os pipelines CI/CD de UsersAPI e CatalogAPI já foram validados no AKS; a busca Elasticsearch fica opcional até ser testada com serviço externo gerenciado.
+- Os pipelines CI/CD de UsersAPI e CatalogAPI ja foram validados no AKS. O codigo de busca esta na main da CatalogAPI e fica desativado sem Secret, mas a FIAP exige concluir seu teste **com servico gerenciado**. Use o roteiro infra/azure/GUIA-REPRODUCAO-E-VALIDACAO.md da Orchestration.

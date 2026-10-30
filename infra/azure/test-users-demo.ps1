@@ -17,7 +17,7 @@ function Get-StatusCode {
         $response = Invoke-WebRequest -Uri $Uri -Headers $Headers -UseBasicParsing
         return [int]$response.StatusCode
     }
-    catch [System.Net.WebException] {
+    catch {
         if ($null -eq $_.Exception.Response) {
             throw
         }
