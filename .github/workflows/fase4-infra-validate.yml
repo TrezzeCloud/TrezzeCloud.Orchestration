@@ -6,7 +6,7 @@ on:
     paths: ['infra/azure/**', 'k8s/cloud/**', '.github/workflows/fase4-infra-validate.yml']
   pull_request:
     branches: [main]
-    paths: ['infra/azure/**', '.github/workflows/fase4-infra-validate.yml']
+    paths: ['infra/azure/**', 'k8s/cloud/**', '.github/workflows/fase4-infra-validate.yml']
 permissions:
   contents: read
 jobs:
@@ -33,3 +33,36 @@ jobs:
               throw "Erro de sintaxe em $($script.FullName)"
             }
           }
+
+      - name: Validar chart e manifesto Ingress sem usar AKS
+        shell: bash
+        run: |
+          set -euo pipefail
+          helm repo add traefik https://traefik.github.io/charts
+          helm repo update traefik
+          helm lint traefik/traefik --version 42.1.3 --values k8s/cloud/edge-demo/traefik-values.yaml
+          helm template fcg-edge traefik/traefik --version 42.1.3             --namespace fcg-ingress             --values k8s/cloud/edge-demo/traefik-values.yaml             --set service.spec.type=ClusterIP > /tmp/fcg-traefik-manifests.yaml
+          python3 -m pip install --quiet --break-system-packages pyyaml
+          python3 - <<'PY'
+          import yaml
+          from pathlib import Path
+
+          rendered = list(yaml.safe_load_all(Path("/tmp/fcg-traefik-manifests.yaml").read_text()))
+          services = [x for x in rendered if isinstance(x, dict) and x.get("kind") == "Service"]
+          assert len(services) == 1, f"Esperado um unico Service Traefik, obtidos: {len(services)}"
+          svc = services[0]
+          assert svc["spec"]["type"] == "ClusterIP"
+          assert [p["port"] for p in svc["spec"]["ports"]] == [443], "Nao publicar HTTP/80 nem dashboard"
+
+          ingress = yaml.safe_load(Path("k8s/cloud/edge-demo/apis-ingress.yaml").read_text())
+          assert ingress["kind"] == "Ingress"
+          assert ingress["spec"]["ingressClassName"] == "fcg-traefik"
+          paths = {p["path"]: p["backend"]["service"]["name"]
+                   for p in ingress["spec"]["rules"][0]["http"]["paths"]}
+          assert paths == {
+              "/api/users": "users-api", "/api/games": "catalog-api",
+              "/api/store": "catalog-api", "/search": "catalog-api"
+          }
+          assert ingress["spec"].get("tls"), "TLS e obrigatorio"
+          print("Ingress HTTPS e roteamento validados sem criar recursos Azure.")
+          PY
