@@ -3,7 +3,7 @@ on:
   workflow_dispatch:
   push:
     branches: [feature/fase4-infra]
-    paths: ['infra/azure/**', '.github/workflows/fase4-infra-validate.yml']
+    paths: ['infra/azure/**', 'k8s/cloud/**', '.github/workflows/fase4-infra-validate.yml']
   pull_request:
     branches: [main]
     paths: ['infra/azure/**', '.github/workflows/fase4-infra-validate.yml']
@@ -20,3 +20,16 @@ jobs:
           inlineScript: |
             az bicep build --file infra/azure/main.bicep --outfile /tmp/fcg-infra.json
             test -s /tmp/fcg-infra.json
+      - name: Validar sintaxe PowerShell
+        shell: pwsh
+        run: |
+          $scripts = Get-ChildItem infra/azure -Filter *.ps1
+          foreach ($script in $scripts) {
+            $tokens = $null
+            $errors = $null
+            [System.Management.Automation.Language.Parser]::ParseFile($script.FullName, [ref]$tokens, [ref]$errors) | Out-Null
+            if ($errors.Count -gt 0) {
+              $errors | ForEach-Object { Write-Error $_.ToString() }
+              throw "Erro de sintaxe em $($script.FullName)"
+            }
+          }
