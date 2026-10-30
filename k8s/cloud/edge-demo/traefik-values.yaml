@@ -1,0 +1,56 @@
+# Ingress opcional: por padrao nao cria IP publico nem Load Balancer.
+fullnameOverride: fcg-traefik
+
+deployment:
+  replicas: 1
+
+ingressClass:
+  enabled: true
+  isDefaultClass: false
+  name: fcg-traefik
+
+providers:
+  kubernetesCRD:
+    enabled: false
+  kubernetesGateway:
+    enabled: false
+  kubernetesIngress:
+    enabled: true
+    ingressClass: fcg-traefik
+
+gateway:
+  enabled: false
+
+api:
+  dashboard: false
+
+ingressRoute:
+  dashboard:
+    enabled: false
+
+ports:
+  web:
+    expose:
+      default: false
+  websecure:
+    expose:
+      default: true
+    exposedPort: 443
+    http:
+      tls:
+        enabled: true
+
+service:
+  spec:
+    type: ClusterIP
+
+resources:
+  requests:
+    cpu: 50m
+    memory: 64Mi
+  limits:
+    cpu: 300m
+    memory: 256Mi
+
+global:
+  sendAnonymousUsage: false

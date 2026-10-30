@@ -1,0 +1,77 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: users-api
+spec:
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      app: users-api
+  template:
+    metadata:
+      labels:
+        app: users-api
+    spec:
+      containers:
+        - name: users-api
+          image: USERS_API_IMAGE_PLACEHOLDER
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 8080
+          env:
+            - name: ASPNETCORE_ENVIRONMENT
+              value: Production
+            - name: ASPNETCORE_URLS
+              value: http://+:8080
+            - name: RabbitMq__Host
+              value: rabbitmq
+            - name: AdminUser__Name
+              value: TrezzeCloud Admin
+            - name: AdminUser__Email
+              value: admin@trezzecloud.com
+            - name: Jwt__Issuer
+              value: TrezzeCloud
+            - name: Jwt__Audience
+              value: TrezzeCloud
+          envFrom:
+            - secretRef:
+                name: users-demo-secrets
+          resources:
+            requests:
+              cpu: 100m
+              memory: 160Mi
+            limits:
+              cpu: 750m
+              memory: 600Mi
+          startupProbe:
+            tcpSocket:
+              port: http
+            periodSeconds: 5
+            failureThreshold: 60
+          readinessProbe:
+            tcpSocket:
+              port: http
+            periodSeconds: 10
+          livenessProbe:
+            tcpSocket:
+              port: http
+            periodSeconds: 20
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: users-api
+spec:
+  type: ClusterIP
+  selector:
+    app: users-api
+  ports:
+    - name: http
+      port: 8080
+      targetPort: http
