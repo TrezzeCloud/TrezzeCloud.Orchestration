@@ -64,126 +64,8 @@ $credentialsJson = az identity federated-credential list -g $ResourceGroup --ide
 if ($LASTEXITCODE -ne 0) { throw 'Falha ao listar credenciais federadas.' }
 $existingCredentials = @($credentialsJson | ConvertFrom-Json)
 
-if ($UsersOidcSubject -notmatch '^repo:.+:environment:azure-demo
-
-foreach ($repo in $repos) {
-    $existing = $existingCredentials | Where-Object { $_.name -eq $repo.Name } | Select-Object -First 1
-    if ($existing) {
-        if ($existing.subject -ne $repo.Subject) {
-            az identity federated-credential update --resource-group $ResourceGroup --identity-name $IdentityName --name $repo.Name --issuer 'https://token.actions.githubusercontent.com' --subject $repo.Subject --audiences 'api://AzureADTokenExchange' -o none
-            if ($LASTEXITCODE -ne 0) {
-                throw "Falha ao atualizar federacao $($repo.Name)."
-            }
-            Write-Host "Federacao atualizada: $($repo.Name)"
-        }
-        else {
-            Write-Host "Federacao ja existente: $($repo.Name)"
-        }
-        continue
-    }
-
-    az identity federated-credential create --resource-group $ResourceGroup --identity-name $IdentityName --name $repo.Name --issuer 'https://token.actions.githubusercontent.com' --subject $repo.Subject --audiences 'api://AzureADTokenExchange' -o none
-    if ($LASTEXITCODE -ne 0) {
-        throw "Falha ao criar federacao $($repo.Name)."
-    }
-    Write-Host "Federacao criada: $($repo.Name)"
-}
-
-$roles = @(
-    @{ Role = 'AcrPush'; Scope = $acrId },
-    @{ Role = 'Azure Kubernetes Service Cluster User Role'; Scope = $aksId }
-)
-
-foreach ($item in $roles) {
-    $existingAssignment = az role assignment list --scope $item.Scope --query "[?principalId=='$principalId' && roleDefinitionName=='$($item.Role)'].id" -o tsv
-    if ($LASTEXITCODE -ne 0) { throw "Falha ao consultar permissao $($item.Role)." }
-
-    if ($existingAssignment) {
-        Write-Host "Permissao ja existente: $($item.Role)"
-        continue
-    }
-
-    az role assignment create --assignee-object-id $principalId --assignee-principal-type ServicePrincipal --role $item.Role --scope $item.Scope -o none
-    if ($LASTEXITCODE -ne 0) {
-        throw "Falha ao atribuir $($item.Role). E necessario Owner ou User Access Administrator no escopo."
-    }
-
-    Write-Host "Permissao atribuida: $($item.Role)"
-}
-
-Write-Host ''
-Write-Host 'Configure estes valores no GitHub Environment azure-demo dos DOIS repositorios:'
-Write-Host 'Secrets:'
-Write-Host "  AZURE_CLIENT_ID       = $clientId"
-Write-Host "  AZURE_TENANT_ID       = $tenantId"
-Write-Host "  AZURE_SUBSCRIPTION_ID = $SubscriptionId"
-Write-Host 'Variables:'
-Write-Host "  ACR_NAME           = $AcrName"
-Write-Host "  AKS_NAME           = $AksName"
-Write-Host "  AKS_RESOURCE_GROUP = $ResourceGroup"
-Write-Host ''
-Write-Host 'Nenhum segredo de acesso foi gerado ou gravado em arquivo. A configuracao GitHub e manual.'
- -or
-    $CatalogOidcSubject -notmatch '^repo:.+:environment:azure-demo
-
-foreach ($repo in $repos) {
-    $existing = $existingCredentials | Where-Object { $_.name -eq $repo.Name } | Select-Object -First 1
-    if ($existing) {
-        if ($existing.subject -ne $repo.Subject) {
-            az identity federated-credential update --resource-group $ResourceGroup --identity-name $IdentityName --name $repo.Name --issuer 'https://token.actions.githubusercontent.com' --subject $repo.Subject --audiences 'api://AzureADTokenExchange' -o none
-            if ($LASTEXITCODE -ne 0) {
-                throw "Falha ao atualizar federacao $($repo.Name)."
-            }
-            Write-Host "Federacao atualizada: $($repo.Name)"
-        }
-        else {
-            Write-Host "Federacao ja existente: $($repo.Name)"
-        }
-        continue
-    }
-
-    az identity federated-credential create --resource-group $ResourceGroup --identity-name $IdentityName --name $repo.Name --issuer 'https://token.actions.githubusercontent.com' --subject $repo.Subject --audiences 'api://AzureADTokenExchange' -o none
-    if ($LASTEXITCODE -ne 0) {
-        throw "Falha ao criar federacao $($repo.Name)."
-    }
-    Write-Host "Federacao criada: $($repo.Name)"
-}
-
-$roles = @(
-    @{ Role = 'AcrPush'; Scope = $acrId },
-    @{ Role = 'Azure Kubernetes Service Cluster User Role'; Scope = $aksId }
-)
-
-foreach ($item in $roles) {
-    $existingAssignment = az role assignment list --scope $item.Scope --query "[?principalId=='$principalId' && roleDefinitionName=='$($item.Role)'].id" -o tsv
-    if ($LASTEXITCODE -ne 0) { throw "Falha ao consultar permissao $($item.Role)." }
-
-    if ($existingAssignment) {
-        Write-Host "Permissao ja existente: $($item.Role)"
-        continue
-    }
-
-    az role assignment create --assignee-object-id $principalId --assignee-principal-type ServicePrincipal --role $item.Role --scope $item.Scope -o none
-    if ($LASTEXITCODE -ne 0) {
-        throw "Falha ao atribuir $($item.Role). E necessario Owner ou User Access Administrator no escopo."
-    }
-
-    Write-Host "Permissao atribuida: $($item.Role)"
-}
-
-Write-Host ''
-Write-Host 'Configure estes valores no GitHub Environment azure-demo dos DOIS repositorios:'
-Write-Host 'Secrets:'
-Write-Host "  AZURE_CLIENT_ID       = $clientId"
-Write-Host "  AZURE_TENANT_ID       = $tenantId"
-Write-Host "  AZURE_SUBSCRIPTION_ID = $SubscriptionId"
-Write-Host 'Variables:'
-Write-Host "  ACR_NAME           = $AcrName"
-Write-Host "  AKS_NAME           = $AksName"
-Write-Host "  AKS_RESOURCE_GROUP = $ResourceGroup"
-Write-Host ''
-Write-Host 'Nenhum segredo de acesso foi gerado ou gravado em arquivo. A configuracao GitHub e manual.'
-) {
+if ($UsersOidcSubject -notmatch '^repo:.+:environment:azure-demo$' -or
+    $CatalogOidcSubject -notmatch '^repo:.+:environment:azure-demo$') {
     throw 'Os dois subjects OIDC devem corresponder ao environment azure-demo dos respectivos repositorios.'
 }
 
@@ -251,5 +133,5 @@ Write-Host ''
 Write-Host 'Nenhum segredo de acesso foi gerado ou gravado em arquivo. A configuracao GitHub e manual.'
 
 Write-Host ''
-Write-Host 'AVISO: esta identidade permite publicar apenas nos repositorios cujos subjects OIDC coincidirem com os registrados no Azure.'
-Write-Host 'Se estiver usando forks, informe -UsersOidcSubject e -CatalogOidcSubject de acordo com o subject emitido por cada repositorio.'
+Write-Host 'AVISO: a identidade so publica a partir dos repositorios cujo OIDC subject coincide com a federacao Azure.'
+Write-Host 'Em forks, use -UsersOidcSubject e -CatalogOidcSubject com os subjects emitidos pelo GitHub Actions.'
