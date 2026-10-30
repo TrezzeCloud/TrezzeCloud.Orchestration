@@ -34,6 +34,12 @@ kubectl config current-context
 
 O script gera senhas de MongoDB e Redis, salva as credenciais no Kubernetes Secret `catalog-demo-secrets` e usa os valores já existentes de SQL Server, RabbitMQ e JWT. A primeira execução cria um disco para MongoDB; nas execuções seguintes o Secret e o PVC são mantidos.
 
+## Validação do build
+
+A CatalogAPI compilou em Release com 19 testes unitários aprovados, sem falhas. Imagem publicada no ACR: `acrfcgcanadatestec733w2tny4nm6.azurecr.io/trezzecloud-catalog-api:fase4-d7f5a4a`.
+
+A implantação Kubernetes ainda não foi executada. Os recursos MongoDB e Redis só serão criados na execução de `deploy-catalog-demo.ps1`.
+
 ## Testes
 
 ```powershell
