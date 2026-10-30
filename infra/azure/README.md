@@ -46,7 +46,7 @@ az aks list -g $rg -o table
 az acr list -g $rg -o table
 ```
 
-A configuração de acesso do AKS ao ACR e a publicação dos serviços serão incluídas na próxima etapa.
+O AKS foi acessado com `az aks get-credentials`. O nó de sistema foi verificado como `Ready`, os pods em `kube-system` estavam `Running` e o ACR foi confirmado como `Succeeded`. Falta vincular a identidade do kubelet ao registry e publicar as imagens.
 
 ## Remoção
 
@@ -66,4 +66,4 @@ O AKS Free não inclui gratuitamente as VMs, discos, rede ou o ACR. A infraestru
 
 Créditos Azure for Students não cobrem ofertas do Azure Marketplace. Isso precisa ser considerado na escolha do serviço gerenciado de Elasticsearch. O RabbitMQ Trigger das Azure Functions exige um plano de hospedagem compatível e também pode representar custo significativo.
 
-**Status:** Bicep compilado e validado; deployment AKS + ACR concluído com Succeeded em Canada Central (um nó Standard_D4_v4). Pendente verificar acesso kubectl, saúde do nó, integração ACR e publicação das APIs.
+**Status:** AKS + ACR provisionados com sucesso em Canada Central. Kubernetes v1.36.5, nó `Ready` e pods de sistema `Running`. Pendente associação de permissões AKS–ACR e publicação das APIs.
