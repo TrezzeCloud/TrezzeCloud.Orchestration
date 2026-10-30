@@ -212,7 +212,7 @@ Em **cada fork > Settings > Environments > azure-demo**, crie:
 
 O script imprime os IDs para copiar nas configuracoes. **Nao** transfira senhas SQL/Mongo/Redis/RabbitMQ, JWT ou API Key Elastic para a pipeline: esses runtime Secrets estao no seu AKS.
 
-Em GitHub **Actions > workflow CI/CD > Run workflow > main**, acompanhe validate, search_integration (CatalogAPI) e publish_deploy. O workflow faz build/test, Docker, login via OIDC, push da imagem com tag do commit SHA e rolling update. **O workflow nao cria AKS nem inicia um AKS parado**; o bootstrap foi feito nos passos anteriores.
+**Pre-requisito para o botao Run workflow da CatalogAPI:** integrar antes a correcao proposta em https://github.com/TrezzeCloud/TrezzeCloud.CatalogAPI/pull/6. Sem ela, a job search_integration fica skipped em workflow_dispatch e o deploy dependente nao roda. Como alternativa no codigo antigo, o evento push na main executa search_integration e o deploy, mas a correcao por PR evita essa surpresa. Em GitHub **Actions > workflow CI/CD > Run workflow > main**, acompanhe validate, search_integration (CatalogAPI) e publish_deploy. O workflow faz build/test, Docker, login via OIDC, push da imagem com tag do commit SHA e rolling update. **O workflow nao cria AKS nem inicia um AKS parado**; o bootstrap foi feito nos passos anteriores.
 
 ## 9. Live deploy real para a gravacao
 
