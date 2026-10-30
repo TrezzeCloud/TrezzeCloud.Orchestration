@@ -46,7 +46,7 @@ az aks list -g $rg -o table
 az acr list -g $rg -o table
 ```
 
-O AKS foi acessado com `az aks get-credentials`. O nó de sistema foi verificado como `Ready`, os pods em `kube-system` estavam `Running` e o ACR foi confirmado como `Succeeded`. O AKS foi associado ao ACR com `az aks update --attach-acr`. O teste `az aks check-acr` no Cloud Shell confirmou resolução DNS, identidade gerenciada e permissão para baixar imagens privadas. A publicação das imagens ainda está pendente.
+O AKS foi acessado com `az aks get-credentials`. O nó de sistema foi verificado como `Ready`, os pods em `kube-system` estavam `Running` e o ACR foi confirmado como `Succeeded`. O AKS foi associado ao ACR com `az aks update --attach-acr`. O teste `az aks check-acr` no Cloud Shell confirmou resolução DNS, identidade gerenciada e permissão para baixar imagens privadas. A imagem da UsersAPI foi publicada no ACR e o deployment com SQL Server e RabbitMQ foi concluído.
 
 ## Remoção
 
@@ -72,4 +72,4 @@ A UsersAPI possui `scripts/publish-acr.ps1` na branch `feature/fase4-ci`. O scri
 
 Créditos Azure for Students não cobrem ofertas do Azure Marketplace. Isso precisa ser considerado na escolha do serviço gerenciado de Elasticsearch. O RabbitMQ Trigger das Azure Functions exige um plano de hospedagem compatível e também pode representar custo significativo.
 
-**Status:** AKS + ACR provisionados com sucesso em Canada Central. Kubernetes v1.36.5, nó `Ready` e pods de sistema `Running`. Associação e validação de acesso AKS–ACR concluídas no Cloud Shell; publicação das imagens e implantação dos serviços pendentes.
+**Status:** AKS + ACR provisionados com sucesso em Canada Central. Kubernetes v1.36.5, nó `Ready` e pods de sistema `Running`. Associação e validação de acesso AKS–ACR concluídas no Cloud Shell; UsersAPI, SQL Server e RabbitMQ em `Running/Ready`; PVC SQL Server de 10 GiB em `Bound`. Pendentes testes HTTP e os demais serviços da Fase 4.
