@@ -71,7 +71,7 @@ Em 30/10/2026, a UsersAPI concluiu a primeira execução automática após corri
 - Imagem `trezzecloud-users-api:12284933a78352ec3bad08e30dbab3676b8ace7b` enviada ao ACR.
 - `kubectl set image` executado e `deployment/users-api` apresentou `successfully rolled out`, com 1/1 Ready.
 
-O deploy da CatalogAPI ainda não foi validado. Não confundir o sucesso do CI da CatalogAPI com o primeiro deploy dela na `main`.
+O PR #2 da CatalogAPI foi integrado à `main` em 30/10/2026 (commit `1450ab42e5b1bae2b2a9273208eba55acf21406d`). O workflow [run #41114425029](https://github.com/TrezzeCloud/TrezzeCloud.CatalogAPI/actions/runs/41114425029) foi acionado. Ainda falta confirmar o resultado do primeiro deploy automático no AKS.
 
 ## 3. Preparação para a primeira publicação automática
 
