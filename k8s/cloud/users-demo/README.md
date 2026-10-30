@@ -33,6 +33,12 @@ kubectl -n fcg-fase4 port-forward svc/users-api 8080:8080
 
 Com o port-forward ativo em outro terminal, verifique `http://localhost:8080/swagger/index.html`. Não exponha a API publicamente enquanto as autenticações, configurações de borda e rotas não estiverem finalizadas.
 
+## Validação no AKS
+
+A primeira execução de `deploy-users-demo.ps1` concluiu o rollout. UsersAPI, SQL Server e RabbitMQ estavam `Running` e `Ready` (1/1), sem reinicializações. O PVC `sqlserver-data` de 10 GiB ficou `Bound`. Todos os serviços ficaram internos como `ClusterIP`.
+
+Ainda falta confirmar os endpoints da UsersAPI por `port-forward` e realizar testes de autenticação.
+
 ## Observações
 
 - `Production` é obrigatório para evitar a criação automática do usuário de teste da Fase 3.
